@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# autotools output
+configure
+makefile
+config.*
+autom4te.cache
