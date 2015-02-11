@@ -81,15 +81,15 @@ static const char* HEX_STRING	= "0123456789abcdef"	/* to convert to hex */
  * store the swapped words in the array CORRECT_WORDS. -- Modified to
  * fix the handling of unaligned buffer spaces - Gray 7/97
  */
-#define OP1(a, b, c, d, b_p, c_p, s, T)				\
-     do {							\
-       memcpy(c_p, b_p, sizeof(md5_uint32));       		\
-       *c_p = SWAP(*c_p);					\
-       a += FF (b, c, d) + *c_p + T;				\
-       a = CYCLIC (a, s);					\
-       a += b;							\
-       b_p = (char *)b_p + sizeof(md5_uint32);			\
-       c_p++;							\
+#define OP1(a, b, c, d, b_p, c_p, s, T) \
+     do { \
+       memcpy(c_p, b_p, sizeof(md5_uint32)); \
+       *c_p = SWAP(*c_p); \
+       a += FF (b, c, d) + *c_p + T; \
+       a = CYCLIC (a, s); \
+       a += b; \
+       b_p = (char *)b_p + sizeof(md5_uint32); \
+       c_p++; \
     } while (0)
 
 /*
@@ -97,11 +97,11 @@ static const char* HEX_STRING	= "0123456789abcdef"	/* to convert to hex */
  * CORRECT_WORDS.  Redefine the macro to take an additional first
  * argument specifying the function to use.
  */
-#define OP234(FUNC, a, b, c, d, k, s, T)		\
-    do { 						\
-      a += FUNC (b, c, d) + k + T;			\
-      a = CYCLIC (a, s);				\
-      a += b;						\
+#define OP234(FUNC, a, b, c, d, k, s, T) \
+    do { \
+      a += FUNC (b, c, d) + k + T; \
+      a = CYCLIC (a, s); \
+      a += b; \
     } while (0)
 
 #endif /* ! __MD5_LOC_H__ */

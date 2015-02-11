@@ -78,8 +78,7 @@ typedef struct
  * 3.3: Step 3).  This is for progressive MD5 calculations only.  If
  * you have the complete string available, md5_buffer should be used.
  * md5_process should be called for each bunch of bytes and after the
- * last process call, md5_finish should be called to get the
- * signature.
+ * last process call, md5_finish should be called to get the signature.
  *
  * RETURNS:
  *
@@ -98,10 +97,10 @@ void	md5_init(md5_t *md5_p);
  * DESCRIPTION:
  *
  * This function is used to progressively calculate a MD5 signature some
- * number of bytes at a time.  If you have the complete string
- * available, md5_buffer should be used.  The MD5 structure should
- * have been initialized with md5_init and after the last process
- * call, md5_finish should be called to get the results.
+ * number of bytes at a time.  If you have the complete string available,
+ * md5_buffer should be used.  The MD5 structure should have been
+ * initialized with md5_init and after the last process call, md5_finish
+ * should be called to get the results.
  *
  * RETURNS:
  *
