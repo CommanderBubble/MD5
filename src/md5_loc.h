@@ -30,7 +30,7 @@
 #ifndef __MD5_LOC_H__
 #define __MD5_LOC_H__
 
-static const char* HEX_STRING = "0123456789abcdef"	/* to convert to hex */
+#define HEX_STRING      "0123456789abcdef"	/* to convert to hex */
 #define BLOCK_SIZE_MASK	(MD5_BLOCK_SIZE - 1)
 
 /*

@@ -46,14 +46,13 @@
  * 78901234567890") = 57edf4a22be3c955ac49da2e2107b67a
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <string.h>
 #include <sys/types.h>
 
 #include "../conf.h"
 #include "md5.h"
 #include "md5_loc.h"
-
 
 /****************************** local routines *******************************/
 
@@ -76,6 +75,7 @@
  *
  * buf_len - The length of the buffer.
  */
+
 static void process_block(md5_t *md5_p, const void *buffer, const unsigned int buf_len) {
     md5_uint32	correct[16];
     const void	*buf_p = buffer, *end_p;
@@ -202,11 +202,11 @@ static void process_block(md5_t *md5_p, const void *buffer, const unsigned int b
         D += D_save;
     }
 
-      /* Put checksum in context given as argument. */
-      md5_p->md_A = A;
-      md5_p->md_B = B;
-      md5_p->md_C = C;
-      md5_p->md_D = D;
+    /* Put checksum in context given as argument. */
+    md5_p->md_A = A;
+    md5_p->md_B = B;
+    md5_p->md_C = C;
+    md5_p->md_D = D;
 }
 
 /*
@@ -530,10 +530,10 @@ void md5_sig_to_string(void *signature, char *str, const int str_len) {
 void md5_sig_from_string(void *signature, const char *str) {
     unsigned char *sig_p;
     const char *str_p;
-    char *hex;
+    char* hex;
     unsigned int high, low, val;
 
-    hex = static_cast<char*>(HEX_STRING);
+    hex = HEX_STRING;
     sig_p = static_cast<unsigned char*>(signature);
 
     for (str_p = str; str_p < str + MD5_SIZE * 2; str_p += 2) {
