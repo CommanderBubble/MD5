@@ -3,12 +3,13 @@
  * bytes sent to stdin.
  */
 
-//#include <stdio.h>
+#include <string.h>
 #include <cstdlib>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
+#
 
 #include "../src/md5.h"
 
@@ -77,7 +78,7 @@ static void read_file(const std::string filename) {
     (void)printf("'\n");
 }
 
-static	void	run_tests(void)
+static void run_tests(void)
 {
     unsigned char sig[MD5_SIZE], sig2[MD5_SIZE];
     char str[33];
@@ -95,30 +96,52 @@ static	void	run_tests(void)
     tests.push_back(std::pair<char*, char*>("This string is exactly 64 characters long for a very good reason", "655c37c2c8451a60306d09f2971e49ff"));
     tests.push_back(std::pair<char*, char*>("This string is also a specific length.  It is exactly 128 characters long for a very good reason as well. We are testing bounds.", "2ac62baa5be7fa36587c55691c026b35"));
 
+    int passed = 0;
+    int passed_h = 0;
+    int passed_c = 0;
+
     /* run our tests */
-    for (test_p = tests; test_p->ss_string != NULL; test_p++) {
+    for (unsigned int i = 0; i < tests.size(); i++) {
+        bool passed_hash = 0;
+        bool passed_convert = 0;
+
+
         /* calculate the sig for our test string */
-        md5_buffer(test_p->first, strlen(test_p->first), sig);
+        md5_buffer(tests[i].first, strlen(tests[i].first), sig);
 
         /* convert from the sig to a string rep */
         md5_sig_to_string(sig, str, sizeof(str));
-        if (strcmp(str, test_p->ss_sig) == 0) {
-          (void)printf("Sig for '%s' matches '%s'\n",
-               test_p->ss_string, test_p->ss_sig);
+        if (strcmp(str, tests[i].second) == 0) {
+            std::cout << "Sig for '" << tests[i].first << "' matches '" << tests[i].second << "'" << std::endl;
+            passed_hash = true;
+            passed_h++;
         } else {
-          (void)printf("ERROR: Sig for '%s' is '%s' not '%s'\n",
-           test_p->ss_string, test_p->ss_sig, str);
+            std::cout << "ERROR: Sig for '" << tests[i].first << "' is '" << tests[i].second << "' not '" << str << "'" << std::endl;
         }
 
         /* convert from the string back into a MD5 signature */
         md5_sig_from_string(sig2, str);
         if (memcmp(sig, sig2, MD5_SIZE) == 0) {
-            (void)printf("  String conversion also matches\n");
+            std::cout << "  String conversion also matches\n";
+            passed_convert = true;
+            passed_c++;
         } else {
-            (void)printf("  ERROR: String conversion for '%s' failed\n",
-            test_p->ss_sig);
+            std::cout << "  ERROR: String conversion for '" << tests[i].second << "' failed\n";
+        }
+
+        if (passed_hash and passed_convert) {
+            passed++;
         }
     }
+
+    std::cout << std::endl << "*******************************" << std::endl
+              << "    " << passed << " of " << tests.size() << " tests passed" << std::endl;
+    if (passed != tests.size()) {
+        std::cout << std::endl << "   Please notify developer" << std::endl;
+        std::cout << "  " << passed_h << " passed hashing check" << std::endl
+                  << "  " << passed_h << " passed comparison check" << std::endl;
+    }
+    std::cout << "*******************************" << std::endl;
 }
 
 /*
