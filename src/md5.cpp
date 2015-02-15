@@ -127,49 +127,53 @@ namespace md5 {
      * buf_len - The length of the buffer.
      */
     void md5_t::process(const void* buffer, const unsigned int buf_len) {
-        unsigned int len = buf_len;
-        unsigned int in_block, add;
+        if (!finished) {
+            unsigned int len = buf_len;
+            unsigned int in_block, add;
 
-        /*
-         * When we already have some bytes in our internal buffer, copy some
-         * from the user to fill the block.
-         */
-        if (md_buf_len > 0) {
-            in_block = md_buf_len;
-            if (in_block + len > sizeof(md_buffer)) {
-                add = sizeof(md_buffer) - in_block;
-            } else {
-                add = len;
+            /*
+             * When we already have some bytes in our internal buffer, copy some
+             * from the user to fill the block.
+             */
+            if (md_buf_len > 0) {
+                in_block = md_buf_len;
+                if (in_block + len > sizeof(md_buffer)) {
+                    add = sizeof(md_buffer) - in_block;
+                } else {
+                    add = len;
+                }
+
+                memcpy (md_buffer + in_block, buffer, add);
+                md_buf_len += add;
+                in_block += add;
+
+                if (in_block > MD5_BLOCK_SIZE) {
+                    process_block (md_buffer, in_block & ~BLOCK_SIZE_MASK);
+                    /* the regions in the following copy operation will not overlap. */
+                    memcpy (md_buffer,
+                    md_buffer + (in_block & ~BLOCK_SIZE_MASK),
+                    in_block & BLOCK_SIZE_MASK);
+                    md_buf_len = in_block & BLOCK_SIZE_MASK;
+                }
+
+                buffer = (const char*)buffer + add;
+                len -= add;
             }
 
-            memcpy (md_buffer + in_block, buffer, add);
-            md_buf_len += add;
-            in_block += add;
-
-            if (in_block > MD5_BLOCK_SIZE) {
-                process_block (md_buffer, in_block & ~BLOCK_SIZE_MASK);
-                /* the regions in the following copy operation will not overlap. */
-                memcpy (md_buffer,
-                md_buffer + (in_block & ~BLOCK_SIZE_MASK),
-                in_block & BLOCK_SIZE_MASK);
-                md_buf_len = in_block & BLOCK_SIZE_MASK;
+            /* process available complete blocks right from the user buffer */
+            if (len > MD5_BLOCK_SIZE) {
+                process_block (buffer, len & ~BLOCK_SIZE_MASK);
+                buffer = (const char*) buffer + (len & ~BLOCK_SIZE_MASK);
+                len &= BLOCK_SIZE_MASK;
             }
 
-            buffer = (const char*)buffer + add;
-            len -= add;
-        }
-
-        /* process available complete blocks right from the user buffer */
-        if (len > MD5_BLOCK_SIZE) {
-            process_block (buffer, len & ~BLOCK_SIZE_MASK);
-            buffer = (const char*) buffer + (len & ~BLOCK_SIZE_MASK);
-            len &= BLOCK_SIZE_MASK;
-        }
-
-        /* copy remaining bytes into the internal buffer */
-        if (len > 0) {
-            memcpy (md_buffer, buffer, len);
-            md_buf_len = len;
+            /* copy remaining bytes into the internal buffer */
+            if (len > 0) {
+                memcpy (md_buffer, buffer, len);
+                md_buf_len = len;
+            }
+        } else {
+            // add error?
         }
     }
 
@@ -188,72 +192,76 @@ namespace md5 {
      *
      * ARGUMENTS:
      *
-     * md5_p - Pointer to MD5 structure which we are finishing.
-     *
      * signature - A 16 byte buffer that will contain the MD5 signature.
      */
     void md5_t::finish(void* signature_) {
-        unsigned int bytes, hold;
-        int pad;
+        if (!finished) {
+            unsigned int bytes, hold;
+            int pad;
 
-        /* take yet unprocessed bytes into account */
-        bytes = md_buf_len;
+            /* take yet unprocessed bytes into account */
+            bytes = md_buf_len;
 
-        /*
-         * Count remaining bytes.  Modified to do this to better avoid
-         * overflows in the lower word -- Gray 10/97.
-         */
-        if (md_total[0] > MAX_MD5_UINT32 - bytes) {
-            md_total[1]++;
-            md_total[0] -= (MAX_MD5_UINT32 + 1 - bytes);
-        } else {
-            md_total[0] += bytes;
-        }
-
-        /*
-         * Pad the buffer to the next MD5_BLOCK-byte boundary.  (RFC 1321,
-         * 3.1: Step 1).  We need enough room for two size words and the
-         * bytes left in the buffer.  For some reason even if we are equal
-         * to the block-size, we add an addition block of pad bytes.
-         */
-        pad = MD5_BLOCK_SIZE - (sizeof(unsigned int) * 2) - bytes;
-        if (pad <= 0) {
-            pad += MD5_BLOCK_SIZE;
-        }
-
-        /*
-         * Modified from a fixed array to this assignment and memset to be
-         * more flexible with block-sizes -- Gray 10/97.
-         */
-        if (pad > 0) {
-            /* some sort of padding start byte */
-            md_buffer[bytes] = (unsigned char)0x80;
-            if (pad > 1) {
-                memset (md_buffer + bytes + 1, 0, pad - 1);
+            /*
+             * Count remaining bytes.  Modified to do this to better avoid
+             * overflows in the lower word -- Gray 10/97.
+             */
+            if (md_total[0] > MAX_MD5_UINT32 - bytes) {
+                md_total[1]++;
+                md_total[0] -= (MAX_MD5_UINT32 + 1 - bytes);
+            } else {
+                md_total[0] += bytes;
             }
-            bytes += pad;
+
+            /*
+             * Pad the buffer to the next MD5_BLOCK-byte boundary.  (RFC 1321,
+             * 3.1: Step 1).  We need enough room for two size words and the
+             * bytes left in the buffer.  For some reason even if we are equal
+             * to the block-size, we add an addition block of pad bytes.
+             */
+            pad = MD5_BLOCK_SIZE - (sizeof(unsigned int) * 2) - bytes;
+            if (pad <= 0) {
+                pad += MD5_BLOCK_SIZE;
+            }
+
+            /*
+             * Modified from a fixed array to this assignment and memset to be
+             * more flexible with block-sizes -- Gray 10/97.
+             */
+            if (pad > 0) {
+                /* some sort of padding start byte */
+                md_buffer[bytes] = (unsigned char)0x80;
+                if (pad > 1) {
+                    memset (md_buffer + bytes + 1, 0, pad - 1);
+                }
+                bytes += pad;
+            }
+
+            /*
+             * Put the 64-bit file length in _bits_ (i.e. *8) at the end of the
+             * buffer.
+             */
+            hold = SWAP((md_total[0] & 0x1FFFFFFF) << 3);
+            memcpy(md_buffer + bytes, &hold, sizeof(unsigned int));
+            bytes += sizeof(unsigned int);
+
+            /* shift the high word over by 3 and add in the top 3 bits from the low */
+            hold = SWAP((md_total[1] << 3) | ((md_total[0] & 0xE0000000) >> 29));
+            memcpy(md_buffer + bytes, &hold, sizeof(unsigned int));
+            bytes += sizeof(unsigned int);
+
+            /* process last bytes, the padding chars, and size words */
+            process_block(md_buffer, bytes);
+            get_result(signature);
+
+            sig_to_string(signature, str, 33);
+
+            memcpy(signature_, signature, strlen(static_cast<char*>(signature)));
+
+            finished = true;
+        } else {
+            // add error?
         }
-
-        /*
-         * Put the 64-bit file length in _bits_ (i.e. *8) at the end of the
-         * buffer.
-         */
-        hold = SWAP((md_total[0] & 0x1FFFFFFF) << 3);
-        memcpy(md_buffer + bytes, &hold, sizeof(unsigned int));
-        bytes += sizeof(unsigned int);
-
-        /* shift the high word over by 3 and add in the top 3 bits from the low */
-        hold = SWAP((md_total[1] << 3) | ((md_total[0] & 0xE0000000) >> 29));
-        memcpy(md_buffer + bytes, &hold, sizeof(unsigned int));
-        bytes += sizeof(unsigned int);
-
-        /* process last bytes, the padding chars, and size words */
-        process_block(md_buffer, bytes);
-        get_result(signature);
-
-        sig_to_string(signature, str, 33);
-
-        memcpy(signature_, signature, strlen(static_cast<char*>(signature)));
     }
 
     void md5_t::get_signature(void* signature_) {
@@ -289,6 +297,8 @@ namespace md5 {
         md_total[0] = 0;
         md_total[1] = 0;
         md_buf_len = 0;
+
+        finished = false;
     }
 
     /*
