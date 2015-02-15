@@ -176,8 +176,8 @@
 
             bool finished;                      /* object state */
 
-            void* signature;                    /* stored signature */
-            char* str;                          /* stored plain text hash */
+            char signature[4 * sizeof(unsigned int)];                 /* stored signature */
+            char str[33];                       /* stored plain text hash */
     };
 
     /*
@@ -201,7 +201,7 @@
      *
      * str_len - the length of the string.
      */
-    extern void sig_to_string(void* signature, char* str, const int str_len);
+    extern void sig_to_string(const void* signature, char* str, const int str_len);
 
     /*
      * md5_sig_from_string
