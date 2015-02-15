@@ -29,7 +29,12 @@ LIBRARY	= lib$(MODULE).a
 BUILD_ALL = $(LIBRARY)
 INSTALL_LIB = $(LIBRARY)
 
-CCFLAGS = @CFLAGS@
+ifneq ($(CXXFLAGS), )
+$(info Using custom $(CXX) flags)
+else
+CXXFLAGS = @CXXFLAGS@
+endif
+
 LDFLAGS = @LDFLAGS@
 
 INSTALL = @INSTALL@
@@ -47,7 +52,6 @@ SHELL = /bin/sh
 HFLS = src/md5.h conf.h
 OBJS = src/md5.o
 
-CFLAGS = $(CCFLAGS)
 TEST = tests/$(MODULE)_t
 
 all : $(BUILD_ALL)
