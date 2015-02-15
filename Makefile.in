@@ -40,9 +40,6 @@ LDFLAGS = @LDFLAGS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 
-PORTFLS	= Makefile.in configure.ac configure README.txt md5.cpp md5.h md5_loc.h md5_t.c rfc1321.txt conf.h.in \
-	install-sh mkinstalldirs
-
 ###############################################################################
 # End of system configuration section.
 ###############################################################################
@@ -95,22 +92,3 @@ $(TEST) : $(TEST).o $(LIBRARY)
 	rm -f $@
 	$(CXX) $(LDFLAGS) -o $(A_OUT) $(TEST).o $(LIBRARY)
 	mv $(A_OUT) $@
-
-.c.o :
-	rm -f $@
-	$(CXX) $(CXFLAGS) $(CPPFLAGS) $(DEFS) $(INCS) -c $< -o ./$@
-
-port :: $(PORTFLS)
-	rm -rf $@
-	mkdir $@
-	cp $(PORTFLS) $@
-	@ echo ''
-	@ echo 'Please rename $@ to md5-version and tar up file'
-
-###############################################################################
-#
-# These dependencies are automatically generated.  Do not edit by hand.
-#
-
-md5.o: md5.cpp conf.h md5.h md5_loc.h
-md5_t.o: md5_t.cpp ../src/md5.h
