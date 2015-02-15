@@ -165,19 +165,19 @@
             void process_block(const void*, const unsigned int);
             void get_result(void*);
 
-            unsigned int md_A;                  /* accumulater 1 */
-            unsigned int md_B;                  /* accumulater 2 */
-            unsigned int md_C;                  /* accumulater 3 */
-            unsigned int md_D;                  /* accumulater 4 */
+            unsigned int md_A;                          /* accumulater 1 */
+            unsigned int md_B;                          /* accumulater 2 */
+            unsigned int md_C;                          /* accumulater 3 */
+            unsigned int md_D;                          /* accumulater 4 */
 
-            unsigned int md_total[2];           /* totaling storage */
-            unsigned int md_buf_len;            /* length of the storage buffer */
-            char md_buffer[MD5_BLOCK_SIZE * 2]; /* character storage buffer */
+            unsigned int md_total[2];                   /* totaling storage */
+            unsigned int md_buf_len;                    /* length of the storage buffer */
+            char md_buffer[MD5_BLOCK_SIZE * 2];         /* character storage buffer */
 
-            bool finished;                      /* object state */
+            bool finished;                              /* object state */
 
-            char signature[4 * sizeof(unsigned int)];                 /* stored signature */
-            char str[33];                       /* stored plain text hash */
+            char signature[4 * sizeof(unsigned int)];   /* stored signature */
+            char str[33];                               /* stored plain text hash */
     };
 
     /*
