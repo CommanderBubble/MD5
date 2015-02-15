@@ -5,11 +5,9 @@
 
 #include <string.h>
 #include <cstdlib>
-#include <string>
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <sstream>
 
 #include "../src/md5.h"
 
