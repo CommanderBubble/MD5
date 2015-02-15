@@ -101,9 +101,6 @@ static void run_tests(void)
         bool passed_hash = 0;
         bool passed_convert = 0;
 
-        std::cout << "Test: " << i << ": '" << tests[i].first << "'" << std::endl;
-        std::cout << "Length: " << strlen(tests[i].first) << std::endl;
-
         /* calculate the sig for our test string */
         md5::md5_t md5(tests[i].first, strlen(tests[i].first), sig);
 
