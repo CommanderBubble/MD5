@@ -14,7 +14,7 @@ VPATH = @srcdir@
 libdir = @libdir@
 includedir = @includedir@
 
-# default c-compiler
+# default c++-compiler
 CXX = @CXX@
 
 DEFS = $(DEFINES)
@@ -46,7 +46,7 @@ INSTALL_DATA = @INSTALL_DATA@
 
 SHELL = /bin/sh
 
-HFLS = src/md5.h conf.h
+HFLS = src/md5.h
 OBJS = src/md5.o
 
 TEST = tests/$(MODULE)_t
