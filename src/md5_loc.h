@@ -30,7 +30,7 @@
 #ifndef __MD5_LOC_H__
 #define __MD5_LOC_H__
 
-#define HEX_STRING      "0123456789abcdef"	/* to convert to hex */
+const char* HEX_STRING = "0123456789abcdef";    /* to convert to hex */
 #define BLOCK_SIZE_MASK	(MD5_BLOCK_SIZE - 1)
 
 /*
@@ -83,12 +83,12 @@
  */
 #define OP1(a, b, c, d, b_p, c_p, s, T) \
      do { \
-       memcpy(c_p, b_p, sizeof(md5_uint32)); \
+       memcpy(c_p, b_p, sizeof(unsigned int)); \
        *c_p = SWAP(*c_p); \
        a += FF (b, c, d) + *c_p + T; \
        a = CYCLIC (a, s); \
        a += b; \
-       b_p = (char *)b_p + sizeof(md5_uint32); \
+       b_p = (char *)b_p + sizeof(unsigned int); \
        c_p++; \
     } while (0)
 
