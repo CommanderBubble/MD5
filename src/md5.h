@@ -32,43 +32,28 @@
 #ifndef __MD5_H__
 #define __MD5_H__
 
-/*
- * Size of a standard MD5 signature in bytes.  This definition is for
- * external programs only.  The MD5 routines themselves reference the
- * signature as 4 unsigned 32-bit integers.
- */
-#define MD5_SIZE	16
-
-/*
- * NOTE: the following is assumed to generate a 32-bit unsigned data
- * type.
- */
-#define MAX_MD5_UINT32		((unsigned int)4294967295U)
-
-/*
- * The MD5 algorithm works on blocks of characters of 64 bytes.  This
- * is an internal value only and is not necessary for external use.
- */
-#define MD5_BLOCK_SIZE		64
-
-/*
- * Structure to save state of computation between the single steps.
- */
-
 #include <string>
 
  namespace md5 {
 
-//    typedef struct {
-//      md5_uint32	md_A;			/* accumulater 1 */
-//      md5_uint32	md_B;			/* accumulater 2 */
-//      md5_uint32	md_C;			/* accumulater 3 */
-//      md5_uint32	md_D;			/* accumulater 4 */
+    /*
+     * Size of a standard MD5 signature in bytes.  This definition is for
+     * external programs only.  The MD5 routines themselves reference the
+     * signature as 4 unsigned 32-bit integers.
+     */
+    #define MD5_SIZE	16
 
-//      md5_uint32	md_total[2];		/* totaling storage */
-//      md5_uint32	md_buf_len;		/* length of the storage buffer */
-//      char		md_buffer[MD5_BLOCK_SIZE * 2];	/* character storage buffer */
-//    } md5_t;
+    /*
+     * NOTE: the following is assumed to generate a 32-bit unsigned data
+     * type.
+     */
+    #define MAX_MD5_UINT32		((unsigned int)4294967295U)
+
+    /*
+     * The MD5 algorithm works on blocks of characters of 64 bytes.  This
+     * is an internal value only and is not necessary for external use.
+     */
+    #define MD5_BLOCK_SIZE		64
 
     class md5_t {
         public:
