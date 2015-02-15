@@ -44,6 +44,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <iostream>
+
 #include "../conf.h"
 #include "md5.h"
 #include "md5_loc.h"
@@ -135,6 +137,7 @@ namespace md5 {
              * When we already have some bytes in our internal buffer, copy some
              * from the user to fill the block.
              */
+
             if (md_buf_len > 0) {
                 in_block = md_buf_len;
                 if (in_block + len > sizeof(md_buffer)) {
@@ -252,11 +255,12 @@ namespace md5 {
 
             /* process last bytes, the padding chars, and size words */
             process_block(md_buffer, bytes);
-            get_result(signature);
+
+            get_result(static_cast<void*>(signature));
 
             sig_to_string(signature, str, 33);
 
-            memcpy(signature_, signature, strlen(static_cast<char*>(signature)));
+            memcpy(signature_, static_cast<void*>(signature), 4 * sizeof(unsigned int));
 
             finished = true;
         } else {
@@ -265,11 +269,11 @@ namespace md5 {
     }
 
     void md5_t::get_signature(void* signature_) {
-        memcpy(signature_, signature, strlen(static_cast<char*>(signature)));
+        memcpy(signature_, signature, 4 * sizeof(unsigned int));
     }
 
     void md5_t::get_string(void* str_) {
-        memcpy(str_, str, strlen(static_cast<char*>(str)));
+        memcpy(str_, str, 33);
     }
 
     /*
@@ -322,7 +326,8 @@ namespace md5 {
      */
     void md5_t::process_block(const void *buffer, const unsigned int buf_len) {
         unsigned int correct[16];
-        const void* buf_p = buffer, *end_p;
+        const void* buf_p = buffer;
+        const void* end_p;
         unsigned int words_n;
         unsigned int A, B, C, D;
 
@@ -510,7 +515,7 @@ namespace md5 {
      *
      * str_len - the length of the string.
      */
-    void sig_to_string(void* signature_, char* str_, const int str_len) {
+    void sig_to_string(const void* signature_, char* str_, const int str_len) {
         unsigned char* sig_p;
         char* str_p;
         char* max_p;
