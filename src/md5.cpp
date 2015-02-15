@@ -44,8 +44,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include <iostream>
-
 #include "../conf.h"
 #include "md5.h"
 #include "md5_loc.h"
