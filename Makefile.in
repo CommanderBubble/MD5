@@ -81,7 +81,7 @@ installlib : $(INSTALL_LIB)
 
 install : installincs installlib
 
-uninstallincs : $(HFLS)
+uninstallincs :
 	rm -f $(includedir)/$(HFLS)
 
 uninstalllib :
