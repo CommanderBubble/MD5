@@ -61,7 +61,7 @@ clean :
 
 realclean : clean
 
-distclean : clean
+distclean : uninstall clean
 	rm -f confdefs.h config.status config.log config.cache conf.*
 	rm -f configure.lineno configure
 	rm -rf autom4te.cache
