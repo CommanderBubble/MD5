@@ -3,7 +3,6 @@
 *.lo
 *.o
 *.obj
-md5_t
 
 # Precompiled Headers
 *.gch
@@ -27,6 +26,7 @@ md5_t
 *.exe
 *.out
 *.app
+md5_t
 
 # autotools output
 configure
