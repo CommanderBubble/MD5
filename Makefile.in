@@ -85,7 +85,7 @@ $(LIBRARY) : $(OBJS) $(NORMAL_OBJS)
 	ar cr $@ $?
 	@RANLIB@ $@
 
-tests : $(TEST)
+check : $(TEST)
 	./$(TEST)
 
 $(TEST) : $(TEST).o $(LIBRARY)

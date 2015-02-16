@@ -64,5 +64,5 @@ AC_OUTPUT
 
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([To run the library tests, type in:])
-AC_MSG_NOTICE([  make tests])
+AC_MSG_NOTICE([  make check])
 AC_MSG_NOTICE([])
