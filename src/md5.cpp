@@ -142,14 +142,14 @@ namespace md5 {
                     add = len;
                 }
 
-                memcpy (md_buffer + in_block, buffer, add);
+                memcpy(md_buffer + in_block, buffer, add);
                 md_buf_len += add;
                 in_block += add;
 
                 if (in_block > md5::BLOCK_SIZE) {
-                    process_block (md_buffer, in_block & ~md5::BLOCK_SIZE_MASK);
+                    process_block(md_buffer, in_block & ~md5::BLOCK_SIZE_MASK);
                     /* the regions in the following copy operation will not overlap. */
-                    memcpy (md_buffer,
+                    memcpy(md_buffer,
                     md_buffer + (in_block & ~md5::BLOCK_SIZE_MASK),
                     in_block & md5::BLOCK_SIZE_MASK);
                     md_buf_len = in_block & md5::BLOCK_SIZE_MASK;
@@ -161,14 +161,14 @@ namespace md5 {
 
             /* process available complete blocks right from the user buffer */
             if (len > md5::BLOCK_SIZE) {
-                process_block (buffer, len & ~md5::BLOCK_SIZE_MASK);
+                process_block(buffer, len & ~md5::BLOCK_SIZE_MASK);
                 buffer = (const char*) buffer + (len & ~md5::BLOCK_SIZE_MASK);
                 len &= md5::BLOCK_SIZE_MASK;
             }
 
             /* copy remaining bytes into the internal buffer */
             if (len > 0) {
-                memcpy (md_buffer, buffer, len);
+                memcpy(md_buffer, buffer, len);
                 md_buf_len = len;
             }
         } else {
@@ -232,7 +232,7 @@ namespace md5 {
                 /* some sort of padding start byte */
                 md_buffer[bytes] = (unsigned char)0x80;
                 if (pad > 1) {
-                    memset (md_buffer + bytes + 1, 0, pad - 1);
+                    memset(md_buffer + bytes + 1, 0, pad - 1);
                 }
                 bytes += pad;
             }
@@ -371,7 +371,7 @@ namespace md5 {
         unsigned int A, B, C, D;
 
         words_n = buf_len / sizeof(unsigned int);
-        end_p = (char *)buf_p + words_n * sizeof(unsigned int);
+        end_p = (char*)buf_p + words_n * sizeof(unsigned int);
 
         A = md_A;
         B = md_B;
@@ -412,76 +412,76 @@ namespace md5 {
              */
 
             /* Round 1. */
-            MD5_OP1 (A, B, C, D, buf_p, corr_p,  7, 0xd76aa478);
-            MD5_OP1 (D, A, B, C, buf_p, corr_p, 12, 0xe8c7b756);
-            MD5_OP1 (C, D, A, B, buf_p, corr_p, 17, 0x242070db);
-            MD5_OP1 (B, C, D, A, buf_p, corr_p, 22, 0xc1bdceee);
-            MD5_OP1 (A, B, C, D, buf_p, corr_p,  7, 0xf57c0faf);
-            MD5_OP1 (D, A, B, C, buf_p, corr_p, 12, 0x4787c62a);
-            MD5_OP1 (C, D, A, B, buf_p, corr_p, 17, 0xa8304613);
-            MD5_OP1 (B, C, D, A, buf_p, corr_p, 22, 0xfd469501);
-            MD5_OP1 (A, B, C, D, buf_p, corr_p,  7, 0x698098d8);
-            MD5_OP1 (D, A, B, C, buf_p, corr_p, 12, 0x8b44f7af);
-            MD5_OP1 (C, D, A, B, buf_p, corr_p, 17, 0xffff5bb1);
-            MD5_OP1 (B, C, D, A, buf_p, corr_p, 22, 0x895cd7be);
-            MD5_OP1 (A, B, C, D, buf_p, corr_p,  7, 0x6b901122);
-            MD5_OP1 (D, A, B, C, buf_p, corr_p, 12, 0xfd987193);
-            MD5_OP1 (C, D, A, B, buf_p, corr_p, 17, 0xa679438e);
-            MD5_OP1 (B, C, D, A, buf_p, corr_p, 22, 0x49b40821);
+            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0xd76aa478);
+            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0xe8c7b756);
+            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0x242070db);
+            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0xc1bdceee);
+            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0xf57c0faf);
+            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0x4787c62a);
+            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xa8304613);
+            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0xfd469501);
+            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0x698098d8);
+            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0x8b44f7af);
+            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xffff5bb1);
+            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0x895cd7be);
+            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0x6b901122);
+            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0xfd987193);
+            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xa679438e);
+            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0x49b40821);
 
             /* Round 2. */
-            MD5_OP234 (MD5_FG, A, B, C, D, correct[  1],  5, 0xf61e2562);
-            MD5_OP234 (MD5_FG, D, A, B, C, correct[  6],  9, 0xc040b340);
-            MD5_OP234 (MD5_FG, C, D, A, B, correct[ 11], 14, 0x265e5a51);
-            MD5_OP234 (MD5_FG, B, C, D, A, correct[  0], 20, 0xe9b6c7aa);
-            MD5_OP234 (MD5_FG, A, B, C, D, correct[  5],  5, 0xd62f105d);
-            MD5_OP234 (MD5_FG, D, A, B, C, correct[ 10],  9, 0x02441453);
-            MD5_OP234 (MD5_FG, C, D, A, B, correct[ 15], 14, 0xd8a1e681);
-            MD5_OP234 (MD5_FG, B, C, D, A, correct[  4], 20, 0xe7d3fbc8);
-            MD5_OP234 (MD5_FG, A, B, C, D, correct[  9],  5, 0x21e1cde6);
-            MD5_OP234 (MD5_FG, D, A, B, C, correct[ 14],  9, 0xc33707d6);
-            MD5_OP234 (MD5_FG, C, D, A, B, correct[  3], 14, 0xf4d50d87);
-            MD5_OP234 (MD5_FG, B, C, D, A, correct[  8], 20, 0x455a14ed);
-            MD5_OP234 (MD5_FG, A, B, C, D, correct[ 13],  5, 0xa9e3e905);
-            MD5_OP234 (MD5_FG, D, A, B, C, correct[  2],  9, 0xfcefa3f8);
-            MD5_OP234 (MD5_FG, C, D, A, B, correct[  7], 14, 0x676f02d9);
-            MD5_OP234 (MD5_FG, B, C, D, A, correct[ 12], 20, 0x8d2a4c8a);
+            MD5_OP234(MD5_FG, A, B, C, D, correct[  1],  5, 0xf61e2562);
+            MD5_OP234(MD5_FG, D, A, B, C, correct[  6],  9, 0xc040b340);
+            MD5_OP234(MD5_FG, C, D, A, B, correct[ 11], 14, 0x265e5a51);
+            MD5_OP234(MD5_FG, B, C, D, A, correct[  0], 20, 0xe9b6c7aa);
+            MD5_OP234(MD5_FG, A, B, C, D, correct[  5],  5, 0xd62f105d);
+            MD5_OP234(MD5_FG, D, A, B, C, correct[ 10],  9, 0x02441453);
+            MD5_OP234(MD5_FG, C, D, A, B, correct[ 15], 14, 0xd8a1e681);
+            MD5_OP234(MD5_FG, B, C, D, A, correct[  4], 20, 0xe7d3fbc8);
+            MD5_OP234(MD5_FG, A, B, C, D, correct[  9],  5, 0x21e1cde6);
+            MD5_OP234(MD5_FG, D, A, B, C, correct[ 14],  9, 0xc33707d6);
+            MD5_OP234(MD5_FG, C, D, A, B, correct[  3], 14, 0xf4d50d87);
+            MD5_OP234(MD5_FG, B, C, D, A, correct[  8], 20, 0x455a14ed);
+            MD5_OP234(MD5_FG, A, B, C, D, correct[ 13],  5, 0xa9e3e905);
+            MD5_OP234(MD5_FG, D, A, B, C, correct[  2],  9, 0xfcefa3f8);
+            MD5_OP234(MD5_FG, C, D, A, B, correct[  7], 14, 0x676f02d9);
+            MD5_OP234(MD5_FG, B, C, D, A, correct[ 12], 20, 0x8d2a4c8a);
 
             /* Round 3. */
-            MD5_OP234 (MD5_FH, A, B, C, D, correct[  5],  4, 0xfffa3942);
-            MD5_OP234 (MD5_FH, D, A, B, C, correct[  8], 11, 0x8771f681);
-            MD5_OP234 (MD5_FH, C, D, A, B, correct[ 11], 16, 0x6d9d6122);
-            MD5_OP234 (MD5_FH, B, C, D, A, correct[ 14], 23, 0xfde5380c);
-            MD5_OP234 (MD5_FH, A, B, C, D, correct[  1],  4, 0xa4beea44);
-            MD5_OP234 (MD5_FH, D, A, B, C, correct[  4], 11, 0x4bdecfa9);
-            MD5_OP234 (MD5_FH, C, D, A, B, correct[  7], 16, 0xf6bb4b60);
-            MD5_OP234 (MD5_FH, B, C, D, A, correct[ 10], 23, 0xbebfbc70);
-            MD5_OP234 (MD5_FH, A, B, C, D, correct[ 13],  4, 0x289b7ec6);
-            MD5_OP234 (MD5_FH, D, A, B, C, correct[  0], 11, 0xeaa127fa);
-            MD5_OP234 (MD5_FH, C, D, A, B, correct[  3], 16, 0xd4ef3085);
-            MD5_OP234 (MD5_FH, B, C, D, A, correct[  6], 23, 0x04881d05);
-            MD5_OP234 (MD5_FH, A, B, C, D, correct[  9],  4, 0xd9d4d039);
-            MD5_OP234 (MD5_FH, D, A, B, C, correct[ 12], 11, 0xe6db99e5);
-            MD5_OP234 (MD5_FH, C, D, A, B, correct[ 15], 16, 0x1fa27cf8);
-            MD5_OP234 (MD5_FH, B, C, D, A, correct[  2], 23, 0xc4ac5665);
+            MD5_OP234(MD5_FH, A, B, C, D, correct[  5],  4, 0xfffa3942);
+            MD5_OP234(MD5_FH, D, A, B, C, correct[  8], 11, 0x8771f681);
+            MD5_OP234(MD5_FH, C, D, A, B, correct[ 11], 16, 0x6d9d6122);
+            MD5_OP234(MD5_FH, B, C, D, A, correct[ 14], 23, 0xfde5380c);
+            MD5_OP234(MD5_FH, A, B, C, D, correct[  1],  4, 0xa4beea44);
+            MD5_OP234(MD5_FH, D, A, B, C, correct[  4], 11, 0x4bdecfa9);
+            MD5_OP234(MD5_FH, C, D, A, B, correct[  7], 16, 0xf6bb4b60);
+            MD5_OP234(MD5_FH, B, C, D, A, correct[ 10], 23, 0xbebfbc70);
+            MD5_OP234(MD5_FH, A, B, C, D, correct[ 13],  4, 0x289b7ec6);
+            MD5_OP234(MD5_FH, D, A, B, C, correct[  0], 11, 0xeaa127fa);
+            MD5_OP234(MD5_FH, C, D, A, B, correct[  3], 16, 0xd4ef3085);
+            MD5_OP234(MD5_FH, B, C, D, A, correct[  6], 23, 0x04881d05);
+            MD5_OP234(MD5_FH, A, B, C, D, correct[  9],  4, 0xd9d4d039);
+            MD5_OP234(MD5_FH, D, A, B, C, correct[ 12], 11, 0xe6db99e5);
+            MD5_OP234(MD5_FH, C, D, A, B, correct[ 15], 16, 0x1fa27cf8);
+            MD5_OP234(MD5_FH, B, C, D, A, correct[  2], 23, 0xc4ac5665);
 
             /* Round 4. */
-            MD5_OP234 (MD5_FI, A, B, C, D, correct[  0],  6, 0xf4292244);
-            MD5_OP234 (MD5_FI, D, A, B, C, correct[  7], 10, 0x432aff97);
-            MD5_OP234 (MD5_FI, C, D, A, B, correct[ 14], 15, 0xab9423a7);
-            MD5_OP234 (MD5_FI, B, C, D, A, correct[  5], 21, 0xfc93a039);
-            MD5_OP234 (MD5_FI, A, B, C, D, correct[ 12],  6, 0x655b59c3);
-            MD5_OP234 (MD5_FI, D, A, B, C, correct[  3], 10, 0x8f0ccc92);
-            MD5_OP234 (MD5_FI, C, D, A, B, correct[ 10], 15, 0xffeff47d);
-            MD5_OP234 (MD5_FI, B, C, D, A, correct[  1], 21, 0x85845dd1);
-            MD5_OP234 (MD5_FI, A, B, C, D, correct[  8],  6, 0x6fa87e4f);
-            MD5_OP234 (MD5_FI, D, A, B, C, correct[ 15], 10, 0xfe2ce6e0);
-            MD5_OP234 (MD5_FI, C, D, A, B, correct[  6], 15, 0xa3014314);
-            MD5_OP234 (MD5_FI, B, C, D, A, correct[ 13], 21, 0x4e0811a1);
-            MD5_OP234 (MD5_FI, A, B, C, D, correct[  4],  6, 0xf7537e82);
-            MD5_OP234 (MD5_FI, D, A, B, C, correct[ 11], 10, 0xbd3af235);
-            MD5_OP234 (MD5_FI, C, D, A, B, correct[  2], 15, 0x2ad7d2bb);
-            MD5_OP234 (MD5_FI, B, C, D, A, correct[  9], 21, 0xeb86d391);
+            MD5_OP234(MD5_FI, A, B, C, D, correct[  0],  6, 0xf4292244);
+            MD5_OP234(MD5_FI, D, A, B, C, correct[  7], 10, 0x432aff97);
+            MD5_OP234(MD5_FI, C, D, A, B, correct[ 14], 15, 0xab9423a7);
+            MD5_OP234(MD5_FI, B, C, D, A, correct[  5], 21, 0xfc93a039);
+            MD5_OP234(MD5_FI, A, B, C, D, correct[ 12],  6, 0x655b59c3);
+            MD5_OP234(MD5_FI, D, A, B, C, correct[  3], 10, 0x8f0ccc92);
+            MD5_OP234(MD5_FI, C, D, A, B, correct[ 10], 15, 0xffeff47d);
+            MD5_OP234(MD5_FI, B, C, D, A, correct[  1], 21, 0x85845dd1);
+            MD5_OP234(MD5_FI, A, B, C, D, correct[  8],  6, 0x6fa87e4f);
+            MD5_OP234(MD5_FI, D, A, B, C, correct[ 15], 10, 0xfe2ce6e0);
+            MD5_OP234(MD5_FI, C, D, A, B, correct[  6], 15, 0xa3014314);
+            MD5_OP234(MD5_FI, B, C, D, A, correct[ 13], 21, 0x4e0811a1);
+            MD5_OP234(MD5_FI, A, B, C, D, correct[  4],  6, 0xf7537e82);
+            MD5_OP234(MD5_FI, D, A, B, C, correct[ 11], 10, 0xbd3af235);
+            MD5_OP234(MD5_FI, C, D, A, B, correct[  2], 15, 0x2ad7d2bb);
+            MD5_OP234(MD5_FI, B, C, D, A, correct[  9], 21, 0xeb86d391);
 
             /* Add the starting values of the context. */
             A += A_save;
@@ -519,15 +519,15 @@ namespace md5 {
 
         hold = MD5_SWAP(md_A);
         memcpy(res_p, &hold, sizeof(unsigned int));
-        res_p = (char *)res_p + sizeof(unsigned int);
+        res_p = (char*)res_p + sizeof(unsigned int);
 
         hold = MD5_SWAP(md_B);
         memcpy(res_p, &hold, sizeof(unsigned int));
-        res_p = (char *)res_p + sizeof(unsigned int);
+        res_p = (char*)res_p + sizeof(unsigned int);
 
         hold = MD5_SWAP(md_C);
         memcpy(res_p, &hold, sizeof(unsigned int));
-        res_p = (char *)res_p + sizeof(unsigned int);
+        res_p = (char*)res_p + sizeof(unsigned int);
 
         hold = MD5_SWAP(md_D);
         memcpy(res_p, &hold, sizeof(unsigned int));
