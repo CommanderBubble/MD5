@@ -40,12 +40,23 @@ AC_HEADER_STDC
 # check for unsigned-ness
 #
 AC_MSG_CHECKING([endian-ness])
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-int main() { int x = 1; char *s = (char *)&x; if (*s == '\001') return 0; else return 1; }
-]])],
-[AC_DEFINE(MD5_BIG_ENDIAN,0)  AC_MSG_RESULT([little])],
-[AC_DEFINE(MD5_BIG_ENDIAN,1)  AC_MSG_RESULT([big])],
-[AC_DEFINE(MD5_BIG_ENDIAN,0)  AC_MSG_RESULT([unknown, assume little])]
+AC_RUN_IFELSE(
+	[AC_LANG_SOURCE([[
+		int main() { int x = 1; char *s = (char *)&x; if (*s == '\001') return 0; else return 1; }
+	]])],
+	[AC_DEFINE(MD5_BIG_ENDIAN, 0, [Little-endian machine])], #[AC_MSG_RESULT([little])],
+	[AC_DEFINE(MD5_BIG_ENDIAN, 1, [Big-endian machine])], # [AC_MSG_RESULT([big])],
+	[AC_DEFINE(MD5_BIG_ENDIAN, 0, [cross-compiling; assumed little-endian])]] #[AC_MSG_RESULT([unknown, assume little]
+)
+
+# HACK: we run the test because AC_RUN_IFELSE wont take multiple actions that i can figure out...
+AC_RUN_IFELSE(
+	[AC_LANG_SOURCE([[
+		int main() { int x = 1; char *s = (char *)&x; if (*s == '\001') return 0; else return 1; }
+	]])],
+	[AC_MSG_RESULT([little])],
+	[AC_MSG_RESULT([big])],
+	[AC_MSG_RESULT([unknown, assume little])]
 )
 
 AC_CONFIG_FILES(Makefile)
