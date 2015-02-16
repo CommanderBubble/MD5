@@ -76,7 +76,7 @@ static void read_file(const char* filename) {
 static void run_tests(void)
 {
     unsigned char sig[MD5_SIZE], sig2[MD5_SIZE];
-    char str[33];
+    char str[MD5_STRING_SIZE];
 
   /* MD5 Test Suite from RFC1321 */
     std::vector<std::pair<const char*, const char*> > tests;
@@ -107,25 +107,22 @@ static void run_tests(void)
         /* convert from the sig to a string rep */
         md5::sig_to_string(sig, str, sizeof(str));
         if (strcmp(str, tests[i].second) == 0) {
-            std::cout << "Sig for '" << tests[i].first << "' matches '" << tests[i].second << "'" << std::endl;
             passed_hash = true;
             passed_h++;
-        } else {
-            std::cout << "ERROR: Sig for '" << tests[i].first << "' is '" << tests[i].second << "' not '" << str << "'" << std::endl;
         }
 
         /* convert from the string back into a MD5 signature */
         md5::sig_from_string(sig2, str);
         if (memcmp(sig, sig2, MD5_SIZE) == 0) {
-            std::cout << "  String conversion also matches\n";
             passed_convert = true;
             passed_c++;
-        } else {
-            std::cout << "  ERROR: String conversion for '" << tests[i].second << "' failed\n";
         }
 
         if (passed_hash and passed_convert) {
+            std::cout << "TEST " << i + 1 << " PASSED" << std::endl;
             passed++;
+        } else {
+            std::cout << "TEST " << i + 1 << " FAILED" << std::endl;
         }
     }
 
