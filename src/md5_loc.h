@@ -9,13 +9,13 @@
  * rights reserved.
  *
  * License to copy and use this software is granted provided that it is
- * identified as the "RSA Data Security, Inc. MD5 Message-Digest
+ * identified as the "RSA Data Security, Inc. md5 Message-Digest
  * Algorithm" in all material mentioning or referencing this software
  * or this function.
  *
  * License is also granted to make and use derivative works provided that
  * such works are identified as "derived from the RSA Data Security,
- * Inc. MD5 Message-Digest Algorithm" in all material mentioning or
+ * Inc. md5 Message-Digest Algorithm" in all material mentioning or
  * referencing the derived work.
  *
  * RSA Data Security, Inc. makes no representations concerning either the
@@ -30,9 +30,9 @@
 #ifndef __MD5_LOC_H__
 #define __MD5_LOC_H__
 
-namespace MD5 {
+namespace md5 {
     const char* HEX_STRING = "0123456789abcdef";    /* to convert to hex */
-    #define BLOCK_SIZE_MASK	(MD5_BLOCK_SIZE - 1)
+    const unsigned int BLOCK_SIZE_MASK = md5::BLOCK_SIZE - 1;
 
     /*
      * Define my endian-ness.  Could not do in a portable manner using the
@@ -43,35 +43,35 @@ namespace MD5 {
     /*
      * big endian - big is better
      */
-    #define SWAP(n) (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24))
+    #define MD5_SWAP(n) (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24))
 
     #else
 
     /*
      * little endian
      */
-    #define SWAP(n) (n)
+    #define MD5_SWAP(n) (n)
 
     #endif
 
     /*
-     * These are the four functions used in the four steps of the MD5
+     * These are the four functions used in the four steps of the md5
      * algorithm and defined in the RFC 1321.  The first function is a
      * little bit optimized (as found in Colin Plumbs public domain
      * implementation).
      */
-    /* #define FF(b, c, d) ((b & c) | (~b & d)) */
-    #define FF(b, c, d) (d ^ (b & (c ^ d)))
-    #define FG(b, c, d) FF(d, b, c)
-    #define FH(b, c, d) (b ^ c ^ d)
-    #define FI(b, c, d) (c ^ (b | ~d))
+    /* #define MD5_FF(b, c, d) ((b & c) | (~b & d)) */
+    #define MD5_FF(b, c, d) (d ^ (b & (c ^ d)))
+    #define MD5_FG(b, c, d) MD5_FF(d, b, c)
+    #define MD5_FH(b, c, d) (b ^ c ^ d)
+    #define MD5_FI(b, c, d) (c ^ (b | ~d))
 
     /*
      * It is unfortunate that C does not provide an operator for cyclic
      * rotation.  Hope the C compiler is smart enough.  -- Modified to
      * remove the w = at the front - Gray 2/97
      */
-    #define CYCLIC(w, s)    ((w << s) | (w >> (32 - s)))
+    #define MD5_CYCLIC(w, s) ((w << s) | (w >> (32 - s)))
 
     /*
      * First Round: using the given function, the context and a constant
@@ -82,12 +82,12 @@ namespace MD5 {
      * store the swapped words in the array CORRECT_WORDS. -- Modified to
      * fix the handling of unaligned buffer spaces - Gray 7/97
      */
-    #define OP1(a, b, c, d, b_p, c_p, s, T) \
+    #define MD5_OP1(a, b, c, d, b_p, c_p, s, T) \
         do { \
             memcpy(c_p, b_p, sizeof(unsigned int)); \
-            *c_p = SWAP(*c_p); \
-            a += FF (b, c, d) + *c_p + T; \
-            a = CYCLIC (a, s); \
+            *c_p = MD5_SWAP(*c_p); \
+            a += MD5_FF (b, c, d) + *c_p + T; \
+            a = MD5_CYCLIC (a, s); \
             a += b; \
             b_p = (char *)b_p + sizeof(unsigned int); \
             c_p++; \
@@ -98,10 +98,10 @@ namespace MD5 {
      * CORRECT_WORDS.  Redefine the macro to take an additional first
      * argument specifying the function to use.
      */
-    #define OP234(FUNC, a, b, c, d, k, s, T) \
+    #define MD5_OP234(FUNC, a, b, c, d, k, s, T) \
         do { \
             a += FUNC (b, c, d) + k + T; \
-            a = CYCLIC (a, s); \
+            a = MD5_CYCLIC (a, s); \
             a += b; \
         } while (0)
 }
