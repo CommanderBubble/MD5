@@ -39,7 +39,8 @@
  * external programs only.  The MD5 routines themselves reference the
  * signature as 4 unsigned 32-bit integers.
  */
-const unsigned int MD5_SIZE = (4 * sizeof(unsigned int)); //16
+const unsigned int MD5_SIZE = (4 * sizeof(unsigned int));   /* 16 */
+const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
 
 
  namespace md5 {
@@ -187,19 +188,19 @@ const unsigned int MD5_SIZE = (4 * sizeof(unsigned int)); //16
             void process_block(const void*, const unsigned int);
             void get_result(void*);
 
-            unsigned int md_A;                  /* accumulator 1 */
-            unsigned int md_B;                  /* accumulator 2 */
-            unsigned int md_C;                  /* accumulator 3 */
-            unsigned int md_D;                  /* accumulator 4 */
+            unsigned int md_A;                      /* accumulator 1 */
+            unsigned int md_B;                      /* accumulator 2 */
+            unsigned int md_C;                      /* accumulator 3 */
+            unsigned int md_D;                      /* accumulator 4 */
 
-            unsigned int md_total[2];           /* totalling storage */
-            unsigned int md_buf_len;            /* length of the storage buffer */
-            char md_buffer[md5::BLOCK_SIZE * 2]; /* character storage buffer */
+            unsigned int md_total[2];               /* totalling storage */
+            unsigned int md_buf_len;                /* length of the storage buffer */
+            char md_buffer[md5::BLOCK_SIZE * 2];    /* character storage buffer */
 
-            bool finished;                      /* object state */
+            bool finished;                          /* object state */
 
-            char signature[MD5_SIZE];           /* stored signature */
-            char str[33];                       /* stored plain text hash */
+            char signature[MD5_SIZE];               /* stored signature */
+            char str[MD5_STRING_SIZE];              /* stored plain text hash */
     };
 
     /*

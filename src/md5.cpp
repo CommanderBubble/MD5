@@ -41,8 +41,7 @@
  */
 
 #include <cstdlib>
-#include <string.h>
-#include <sys/types.h>
+#include <cstring>
 
 #include "../conf.h"
 #include "md5.h"
