@@ -194,7 +194,7 @@ const unsigned int MD5_SIZE = (4 * sizeof(unsigned int)); //16
 
             unsigned int md_total[2];           /* totalling storage */
             unsigned int md_buf_len;            /* length of the storage buffer */
-            char md_buffer[m5::BLOCK_SIZE * 2]; /* character storage buffer */
+            char md_buffer[md5::BLOCK_SIZE * 2]; /* character storage buffer */
 
             bool finished;                      /* object state */
 
