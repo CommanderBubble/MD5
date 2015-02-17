@@ -1,45 +1,3 @@
-/*
- * Functions to compute MD5 message digest of files or memory blocks
- * according to the definition of MD5 in RFC 1321 from April 1992.
- * Copyright (C) 1995, 1996 Free Software Foundation, Inc.  NOTE: The
- * canonical source of this file is maintained with the GNU C Library.
- * Bugs can be reported to bug-glibc@prep.ai.mit.edu.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.
- *
- * Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
- * Modified by Gray Watson <http://256.com/gray/>, 1997.
- *
- * $Id: md5.c,v 1.8 2010-05-07 13:58:18 gray Exp $
- */
-
-/*
- * MD5 Test Suite from RFC1321: http://ds.internic.net:/rfc/rfc1321.txt
- *
- * MD5 ("") = d41d8cd98f00b204e9800998ecf8427e
- * MD5 ("a") = 0cc175b9c0f1b6a831c399e269772661
- * MD5 ("abc") = 900150983cd24fb0d6963f7d28e17f72
- * MD5 ("message digest") = f96b697d7cb7938d525a2f31aaf161d0
- * MD5 ("abcdefghijklmnopqrstuvwxyz") = c3fcd3d76192e4007dfb496cca67e13b
- * MD5 ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789") =
- * d174ab98d277d9f5a5611c2c9f419d9f
- * MD5 ("123456789012345678901234567890123456789012345678901234567890123456
- * 78901234567890") = 57edf4a22be3c955ac49da2e2107b67a
- */
-
 #include <cstdlib>
 #include <cstring>
 
@@ -355,8 +313,6 @@ namespace md5 {
      * None.
      *
      * ARGUMENTS:
-     *
-     * md5_p - Pointer to MD5 structure from which we are getting the result.
      *
      * buffer - A buffer of bytes whose MD5 signature we are calculating.
      *
