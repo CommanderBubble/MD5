@@ -73,8 +73,7 @@ static void read_file(const char* filename) {
     (void)printf("'\n");
 }
 
-static void run_tests(void)
-{
+static void run_tests(void) {
     unsigned char sig[MD5_SIZE], sig2[MD5_SIZE];
     char str[MD5_STRING_SIZE];
 
@@ -173,7 +172,7 @@ int main(int argc, char **argv) {
             default:
                 usage();
                 break;
-            }
+        }
     }
 
     if (argc > 0) {
