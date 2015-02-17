@@ -289,16 +289,143 @@ namespace md5 {
      * None.
      */
     void md5_t::initialise() {
-        md_A = 0x67452301;
-        md_B = 0xefcdab89;
-        md_C = 0x98badcfe;
-        md_D = 0x10325476;
+        A = 0x67452301;
+        B = 0xefcdab89;
+        C = 0x98badcfe;
+        D = 0x10325476;
 
-        md_total[0] = 0;
-        md_total[1] = 0;
-        md_buf_len = 0;
+//        md_total[0] = 0;
+//        md_total[1] = 0;
+//        md_buf_len = 0;
 
         finished = false;
+    }
+
+    void md5_t::process_block_new() {
+    /* Process each 16-word block. */
+//    For i = 0 to N/16-1 do
+
+        /* Copy block i into X. */
+        For j = 0 to 15 do
+            Set X[j] to M[i*16+j].
+        end /* of loop on j */
+
+        /* Save A as AA, B as BB, C as CC, and D as DD. */
+        unsigned int AA = A, BB = B, CC = C, DD = D;
+
+        /* Round 1
+         * Let [abcd k s i] denote the operation
+         * a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s)
+         * Do the following 16 operations
+         * [ABCD  0  7  1]  [DABC  1 12  2]  [CDAB  2 17  3]  [BCDA  3 22  4]
+         * [ABCD  4  7  5]  [DABC  5 12  6]  [CDAB  6 17  7]  [BCDA  7 22  8]
+         * [ABCD  8  7  9]  [DABC  9 12 10]  [CDAB 10 17 11]  [BCDA 11 22 12]
+         * [ABCD 12  7 13]  [DABC 13 12 14]  [CDAB 14 17 15]  [BCDA 15 22 16]
+         */
+        FF(A, B, C, D, X[0 ], , 0 );
+        FF(D, A, B, C, X[1 ], , 1 );
+        FF(C, D, A, B, X[2 ], , 2 );
+        FF(B, C, D, A, X[3 ], , 3 );
+        FF(A, B, C, D, X[4 ], , 4 );
+        FF(D, A, B, C, X[5 ], , 5 );
+        FF(C, D, A, B, X[6 ], , 6 );
+        FF(B, C, D, A, X[7 ], , 7 );
+        FF(A, B, C, D, X[8 ], , 8 );
+        FF(D, A, B, C, X[9 ], , 9 );
+        FF(C, D, A, B, X[10], , 10);
+        FF(B, C, D, A, X[11], , 11);
+        FF(A, B, C, D, X[12], , 12);
+        FF(D, A, B, C, X[13], , 13);
+        FF(C, D, A, B, X[14], , 14);
+        FF(B, C, D, A, X[15], , 15);
+
+        /* Round 2
+         * Let [abcd k s i] denote the operation
+         * a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s)
+         * Do the following 16 operations
+         * [ABCD  1  5 17]  [DABC  6  9 18]  [CDAB 11 14 19]  [BCDA  0 20 20]
+         * [ABCD  5  5 21]  [DABC 10  9 22]  [CDAB 15 14 23]  [BCDA  4 20 24]
+         * [ABCD  9  5 25]  [DABC 14  9 26]  [CDAB  3 14 27]  [BCDA  8 20 28]
+         * [ABCD 13  5 29]  [DABC  2  9 30]  [CDAB  7 14 31]  [BCDA 12 20 32]
+         */
+        GG(A, B, C, D, 0,  X[], 16);
+        GG(D, A, B, C, 1,  X[], 17);
+        GG(C, D, A, B, 2,  X[], 18);
+        GG(B, C, D, A, 3,  X[], 19);
+        GG(A, B, C, D, 4,  X[], 20);
+        GG(D, A, B, C, 5,  X[], 21);
+        GG(C, D, A, B, 6,  X[], 22);
+        GG(B, C, D, A, 7,  X[], 23);
+        GG(A, B, C, D, 8,  X[], 24);
+        GG(D, A, B, C, 9,  X[], 25);
+        GG(C, D, A, B, 10, X[], 26);
+        GG(B, C, D, A, 11, X[], 27);
+        GG(A, B, C, D, 12, X[], 28);
+        GG(D, A, B, C, 13, X[], 29);
+        GG(C, D, A, B, 14, X[], 30);
+        GG(B, C, D, A, 15, X[], 31);
+
+        /* Round 3
+         * Let [abcd k s i] denote the operation
+         * a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s)
+         * Do the following 16 operations
+         * [ABCD  5  4 33]  [DABC  8 11 34]  [CDAB 11 16 35]  [BCDA 14 23 36]
+         * [ABCD  1  4 37]  [DABC  4 11 38]  [CDAB  7 16 39]  [BCDA 10 23 40]
+         * [ABCD 13  4 41]  [DABC  0 11 42]  [CDAB  3 16 43]  [BCDA  6 23 44]
+         * [ABCD  9  4 45]  [DABC 12 11 46]  [CDAB 15 16 47]  [BCDA  2 23 48]
+         */
+        HH(A, B, C, D, 0,  X[], 32);
+        HH(D, A, B, C, 1,  X[], 33);
+        HH(C, D, A, B, 2,  X[], 34);
+        HH(B, C, D, A, 3,  X[], 35);
+        HH(A, B, C, D, 4,  X[], 36);
+        HH(D, A, B, C, 5,  X[], 37);
+        HH(C, D, A, B, 6,  X[], 38);
+        HH(B, C, D, A, 7,  X[], 39);
+        HH(A, B, C, D, 8,  X[], 40);
+        HH(D, A, B, C, 9,  X[], 41);
+        HH(C, D, A, B, 10, X[], 42);
+        HH(B, C, D, A, 11, X[], 43);
+        HH(A, B, C, D, 12, X[], 44);
+        HH(D, A, B, C, 13, X[], 45);
+        HH(C, D, A, B, 14, X[], 46);
+        HH(B, C, D, A, 15, X[], 47);
+
+        /* Round 4
+         * Let [abcd k s i] denote the operation
+         * a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s)
+         * Do the following 16 operations
+         * [ABCD  0  6 49]  [DABC  7 10 50]  [CDAB 14 15 51]  [BCDA  5 21 52]
+         * [ABCD 12  6 53]  [DABC  3 10 54]  [CDAB 10 15 55]  [BCDA  1 21 56]
+         * [ABCD  8  6 57]  [DABC 15 10 58]  [CDAB  6 15 59]  [BCDA 13 21 60]
+         * [ABCD  4  6 61]  [DABC 11 10 62]  [CDAB  2 15 63]  [BCDA  9 21 64]
+         */
+        II(A, B, C, D, 0,  X[], 48);
+        II(D, A, B, C, 1,  X[], 49);
+        II(C, D, A, B, 2,  X[], 50);
+        II(B, C, D, A, 3,  X[], 51);
+        II(A, B, C, D, 4,  X[], 52);
+        II(D, A, B, C, 5,  X[], 53);
+        II(C, D, A, B, 6,  X[], 54);
+        II(B, C, D, A, 7,  X[], 55);
+        II(A, B, C, D, 8,  X[], 56);
+        II(D, A, B, C, 9,  X[], 57);
+        II(C, D, A, B, 10, X[], 58);
+        II(B, C, D, A, 11, X[], 59);
+        II(A, B, C, D, 12, X[], 60);
+        II(D, A, B, C, 13, X[], 61);
+        II(C, D, A, B, 14, X[], 62);
+        II(B, C, D, A, 15, X[], 63);
+
+        /* Then perform the following additions. (That is increment each
+        of the four registers by the value it had before this block
+        was started.) */
+        A += AA;
+        B += BB;
+        C += CC;
+        D += DD;
+
+    end /* of loop on i */
     }
 
     /*
@@ -363,7 +490,7 @@ namespace md5 {
              * Before we start, one word to the strange constants.  They are
              * defined in RFC 1321 as
              *
-             * T[i] = (int) (4294967296.0 * fabs (sin (i))), i=1..MD5_BLOCK
+             * T[i] = (int) (4294967296.0 * fabs (sin (i))), i=1..64
              */
 
             /* Round 1. */

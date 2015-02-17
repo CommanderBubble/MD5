@@ -11,21 +11,7 @@
 const unsigned int MD5_SIZE = (4 * sizeof(unsigned int));   /* 16 */
 const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
 
-
  namespace md5 {
-    /*
-     * NOTE: the following is assumed to generate a 32-bit unsigned data
-     * type.
-     */
-//    #define MAX_MD5_UINT32 ((unsigned int)4294967295U)
-    const unsigned int UINT32_MAX = 4294967295U;
-
-    /*
-     * The MD5 algorithm works on blocks of characters of 64 bytes.  This
-     * is an internal value only and is not necessary for external use.
-     */
-//    #define MD5_BLOCK_SIZE 64
-    const unsigned int BLOCK_SIZE = 64;
 
     class md5_t {
         public:
@@ -155,16 +141,19 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
             /* internal functions */
             void initialise();
             void process_block(const void*, const unsigned int);
+            void process_block_new();
             void get_result(void*);
 
-            unsigned int md_A;                      /* accumulator 1 */
-            unsigned int md_B;                      /* accumulator 2 */
-            unsigned int md_C;                      /* accumulator 3 */
-            unsigned int md_D;                      /* accumulator 4 */
+            unsigned int A;                         /* accumulator 1 */
+            unsigned int B;                         /* accumulator 2 */
+            unsigned int C;                         /* accumulator 3 */
+            unsigned int D;                         /* accumulator 4 */
 
-            unsigned int md_total[2];               /* totalling storage */
-            unsigned int md_buf_len;                /* length of the storage buffer */
-            char md_buffer[md5::BLOCK_SIZE * 2];    /* character storage buffer */
+
+
+//            unsigned int total[2];                  /* totalling storage */
+//            unsigned int buf_len;                   /* length of the storage buffer */
+//            char md_buffer[md5::BLOCK_SIZE * 2];    /* character storage buffer */
 
             bool finished;                          /* object state */
 
