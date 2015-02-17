@@ -1,7 +1,5 @@
 ###############################################################################
-# @configure_input@
-# Makefile for the DMalloc library.
-# $Id: Makefile.in,v 1.3 2010-05-07 15:12:37 gray Exp $
+# Basic Makefile for the MD5 library.
 ###############################################################################
 
 # default root installation directory
@@ -9,7 +7,6 @@ prefix = @prefix@
 exec_prefix = @exec_prefix@
 
 srcdir = @srcdir@
-VPATH = @srcdir@
 
 libdir = @libdir@
 includedir = @includedir@
@@ -17,9 +14,6 @@ includedir = @includedir@
 # default c++-compiler
 CXX = @CXX@
 
-DEFS = $(DEFINES)
-INCS = -I. -I$(srcdir) $(INCLUDES)
-LIBS = -L. @LIBS@
 A_OUT = aout@EXEEXT@
 
 MODULE	= md5
@@ -43,8 +37,6 @@ INSTALL_DATA = @INSTALL_DATA@
 ###############################################################################
 # End of system configuration section.
 ###############################################################################
-
-SHELL = /bin/sh
 
 HFLS = src/md5.h
 OBJS = src/md5.o
