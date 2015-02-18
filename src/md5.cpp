@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
 
 #include "../conf.h"
 #include "md5.h"
@@ -63,32 +64,30 @@ namespace md5 {
         finish(signature);
     }
 
-    void md5_t::process_new(const void* buffer_, const unsigned int buffer_length_) {
+    void md5_t::process_new(const void* buffer_, const unsigned int buffer_length) {
         if (!finished) {
-            char internal_buffer[md5::BLOCK_SIZE];
-            unsigned int buffer_length_mod, processed_bytes;
+            char block[md5::BLOCK_SIZE];
+            unsigned int processed = 0;
 
-            if (unprocessed_length) {
-                memcpy(internal_buffer, unprocessed, (unprocessed_length < md5::BLOCK_SIZE ? unprocessed_length : md5::BLOCK_SIZE));
-                memcpy(internal_buffer + unprocessed_length, buffer_, md5::BLOCK_SIZE - unprocessed_length);
-
-                buffer_length_mod -= unprocessed_length;
-                unprocessed_length = 0;
-
-                process_block_new(internal_buffer);
-
+            if (stored_size) {
+                memcpy(block, stored, stored_size);
+                memcpy(block + stored_size, buffer_, md5::BLOCK_SIZE - stored_size);
+                processed = stored_size;
+                process_block_new(block);
             }
 
-            while (buffer_length_mod >= md5::BLOCK_SIZE) {
-                memcpy(internal_buffer, buffer_ + processed_bytes, md5::BLOCK_SIZE);
-                buffer_length_mod -= md5::BLOCK_SIZE;
-                processed_bytes += md5::BLOCK_SIZE;
-
-                process_block_new(internal_buffer);
+            while (processed + md5::BLOCK_SIZE <= buffer_length) {
+                memcpy(block, (char*)buffer_ + processed, md5::BLOCK_SIZE);
+                processed += md5::BLOCK_SIZE;
+                process_block_new(block);
             }
 
-
-
+            if (processed != buffer_length) {
+                stored_size = buffer_length - processed;
+                memcpy(stored, (char*)buffer_ + processed, stored_size);
+            } else {
+                stored_size = 0;
+            }
         } else {
             // throw error when trying to process after completion?
         }
@@ -182,6 +181,91 @@ namespace md5 {
      *
      * signature - A 16 byte buffer that will contain the MD5 signature.
      */
+    void md5_t::finish_new(void* signature_) {
+        if (!finished) {
+            unsigned int bytes, hold;
+            int pad;
+
+            /* take yet unprocessed bytes into account */
+            bytes = stored_size;
+
+            /*
+             * Count remaining bytes.  Modified to do this to better avoid
+             * overflows in the lower word -- Gray 10/97.
+             */
+
+            std::cout << "length: " << message_length[1] << message_length[0] << std::endl;
+
+            if (message_length[0] + bytes < message_length[0])
+                message_length[1]++;
+            message_length[0] += bytes;
+
+            std::cout << "length: " << message_length[1] << message_length[0] << std::endl;
+
+            /*
+             * Pad the buffer to the next MD5_BLOCK-byte boundary.  (RFC 1321,
+             * 3.1: Step 1).  We need enough room for two size words and the
+             * bytes left in the buffer.  For some reason even if we are equal
+             * to the block-size, we add an addition block of pad bytes.
+             */
+            pad = md5::BLOCK_SIZE - (sizeof(unsigned int) * 2) - bytes;
+            if (pad <= 0) {
+                pad += md5::BLOCK_SIZE;
+            }
+
+            /*
+             * Modified from a fixed array to this assignment and memset to be
+             * more flexible with block-sizes -- Gray 10/97.
+             */
+            if (pad > 0) {
+                /* some sort of padding start byte */
+                stored[bytes] = (unsigned char)0x80;
+                if (pad > 1) {
+                    memset(stored + bytes + 1, 0, pad - 1);
+                }
+                bytes += pad;
+            }
+
+            /*
+             * Put the 64-bit file length in _bits_ (i.e. *8) at the end of the
+             * buffer.
+             */
+            hold = MD5_SWAP((message_length[0] & 0x1FFFFFFF) << 3);
+            memcpy(stored + bytes, &hold, sizeof(unsigned int));
+            bytes += sizeof(unsigned int);
+
+            /* shift the high word over by 3 and add in the top 3 bits from the low */
+            hold = MD5_SWAP((message_length[1] << 3) | ((message_length[0] & 0xE0000000) >> 29));
+            memcpy(stored + bytes, &hold, sizeof(unsigned int));
+            bytes += sizeof(unsigned int);
+
+            unsigned int high = (message_length[1] << 3) | ((message_length[0] & 0xE0000000) >> 29);
+            unsigned int low = ((message_length[0] & 0x1FFFFFFF) << 3);
+            std::cout << "length: " << high << " " << low << std::endl;
+
+            /* process last bytes, the padding chars, and size words */
+            int counter = 0;
+            while (counter < bytes) {
+                char temp[md5::BLOCK_SIZE];
+                memcpy(temp, stored + counter, md5::BLOCK_SIZE);
+                counter += md5::BLOCK_SIZE;
+                process_block_new(temp);
+            }
+
+            get_result(static_cast<void*>(signature));
+
+            sig_to_string(signature, str, 33);
+
+            if (signature_ != NULL) {
+                memcpy(signature_, static_cast<void*>(signature), MD5_SIZE);
+            }
+
+            finished = true;
+        } else {
+            // add error?
+        }
+    }
+
     void md5_t::finish(void* signature_) {
         if (!finished) {
             unsigned int bytes, hold;
@@ -189,6 +273,9 @@ namespace md5 {
 
             /* take yet unprocessed bytes into account */
             bytes = buf_len;
+
+
+            std::cout << "length: " << total[1] << total[0] << std::endl;
 
             /*
              * Count remaining bytes.  Modified to do this to better avoid
@@ -200,6 +287,8 @@ namespace md5 {
             } else {
                 total[0] += bytes;
             }
+
+            std::cout << "length: " << total[1] << total[0] << std::endl;
 
             /*
              * Pad the buffer to the next MD5_BLOCK-byte boundary.  (RFC 1321,
@@ -238,6 +327,10 @@ namespace md5 {
             memcpy(buffer + bytes, &hold, sizeof(unsigned int));
             bytes += sizeof(unsigned int);
 
+            unsigned int high = (total[1] << 3) | ((total[0] & 0xE0000000) >> 29);
+            unsigned int low = ((total[0] & 0x1FFFFFFF) << 3);
+            std::cout << "length: " << high << " " << low << std::endl;
+
             /* process last bytes, the padding chars, and size words */
             process_block(buffer, bytes);
 
@@ -273,6 +366,8 @@ namespace md5 {
     void md5_t::get_sig(void* signature_) {
         if (finished) {
             memcpy(signature_, signature, MD5_SIZE);
+        } else {
+            //error?
         }
     }
 
@@ -298,6 +393,8 @@ namespace md5 {
     void md5_t::get_string(void* str_, const unsigned int str_len) {
         if (finished) {
             memcpy(str_, str, str_len);
+        } else {
+            // error?
         }
     }
 
@@ -325,6 +422,10 @@ namespace md5 {
         C = 0x98badcfe;
         D = 0x10325476;
 
+        message_length[0] = 0;
+        message_length[1] = 0;
+        stored_size = 0;
+
         total[0] = 0;
         total[1] = 0;
         buf_len = 0;
@@ -332,17 +433,8 @@ namespace md5 {
         finished = false;
     }
 
-    void md5_t::process_block_new(const char* block) {
+    void md5_t::process_block_new(const void* block) {
     /* Process each 16-word block. */
-
-        /* Copy block i into X. */
-        //For j = 0 to 15 do
-        //    Set X[j] to M[i*16+j].
-        /* of loop on j */
-        unsigned int X[16];
-        for (unsigned int i = 0; i < 16; i++) {
-            X[i] = md5::word_to_uint(block, 4 * i);
-        }
 
         /*
          * we check for when the lower word rolls over, and increment the
@@ -352,10 +444,34 @@ namespace md5 {
          */
         if (message_length[0] + md5::BLOCK_SIZE < message_length[0])
             message_length[1]++;
-        message_length[0] += md5::BLOCK_SIZE;
+        message_length[0] += BLOCK_SIZE;
+
+        char* temp = (char*)block;
+
+        std::cout << "provided BLOCK: \"";
+
+        for (unsigned int i = 0; i < 64; i++) {
+            std::cout << temp[i];
+        }
+
+        std::cout << "\"\n";
+        /* Copy block i into X. */
+        //For j = 0 to 15 do
+        //    Set X[j] to M[i*16+j].
+        /* of loop on j */
+        unsigned int X[16];
+        for (unsigned int i = 0; i < 16; i++) {
+            memcpy(X + i, (char*)block + 4 * i, 4);
+        }
 
         /* Save A as AA, B as BB, C as CC, and D as DD. */
         unsigned int AA = A, BB = B, CC = C, DD = D;
+
+        std::cout << "BEFORE:\n";
+        std::cout << "A: " << A << std::endl
+                  << "B: " << B << std::endl
+                  << "C: " << C << std::endl
+                  << "D: " << D << std::endl;
 
         /* Round 1
          * Let [abcd k s i] denote the operation
@@ -468,6 +584,13 @@ namespace md5 {
         B += BB;
         C += CC;
         D += DD;
+
+        std::cout << "AFTER:\n";
+        std::cout << "A: " << A << std::endl
+                  << "B: " << B << std::endl
+                  << "C: " << C << std::endl
+                  << "D: " << D << std::endl;
+
     }
 
     /*
@@ -488,6 +611,16 @@ namespace md5 {
      * buf_len - The length of the buffer.
      */
     void md5_t::process_block(const void *buffer_, const unsigned int buf_len_) {
+        std::cout << "provided BLOCK: \"";
+
+        char* temp = (char*)buffer_;
+
+        for (unsigned int i = 0; i < buf_len_; i++) {
+            std::cout << temp[i];
+        }
+
+        std::cout << "\"\n";
+
         unsigned int correct[16];
         const void* buf_p = buffer_;
         const void* end_p;
@@ -522,12 +655,21 @@ namespace md5 {
             CC = C;
             DD = D;
 
+            std::cout << "BEFORE:\n";
+            std::cout << "A: " << A << std::endl
+                      << "B: " << B << std::endl
+                      << "C: " << C << std::endl
+                      << "D: " << D << std::endl;
+
+
             /*
              * Before we start, one word to the strange constants.  They are
              * defined in RFC 1321 as
              *
              * T[i] = (int) (4294967296.0 * fabs (sin (i))), i=1..64
              */
+
+            unsigned int place = 0;
 
             /* Round 1. */
             MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0xd76aa478);
@@ -547,6 +689,8 @@ namespace md5 {
             MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xa679438e);
             MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0x49b40821);
 
+            place = 0;
+
             /* Round 2. */
             MD5_OP234(MD5_FG, A, B, C, D, correct[  1],  5, 0xf61e2562);
             MD5_OP234(MD5_FG, D, A, B, C, correct[  6],  9, 0xc040b340);
@@ -565,6 +709,8 @@ namespace md5 {
             MD5_OP234(MD5_FG, C, D, A, B, correct[  7], 14, 0x676f02d9);
             MD5_OP234(MD5_FG, B, C, D, A, correct[ 12], 20, 0x8d2a4c8a);
 
+            place = 0;
+
             /* Round 3. */
             MD5_OP234(MD5_FH, A, B, C, D, correct[  5],  4, 0xfffa3942);
             MD5_OP234(MD5_FH, D, A, B, C, correct[  8], 11, 0x8771f681);
@@ -582,6 +728,8 @@ namespace md5 {
             MD5_OP234(MD5_FH, D, A, B, C, correct[ 12], 11, 0xe6db99e5);
             MD5_OP234(MD5_FH, C, D, A, B, correct[ 15], 16, 0x1fa27cf8);
             MD5_OP234(MD5_FH, B, C, D, A, correct[  2], 23, 0xc4ac5665);
+
+            place = 0;
 
             /* Round 4. */
             MD5_OP234(MD5_FI, A, B, C, D, correct[  0],  6, 0xf4292244);
@@ -606,6 +754,13 @@ namespace md5 {
             B += BB;
             C += CC;
             D += DD;
+
+            std::cout << "AFTER:\n";
+            std::cout << "A: " << A << std::endl
+                      << "B: " << B << std::endl
+                      << "C: " << C << std::endl
+                      << "D: " << D << std::endl;
+
         }
     }
 
