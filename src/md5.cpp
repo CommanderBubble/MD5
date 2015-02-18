@@ -66,7 +66,7 @@ namespace md5 {
     void md5_t::process_new(const void* buffer_, const unsigned int buffer_length_) {
         if (!finished) {
             char internal_buffer[md5::BLOCK_SIZE];
-            unsigned int buffer_length_mod;
+            unsigned int buffer_length_mod, processed_bytes;
 
             if (unprocessed_length) {
                 memcpy(internal_buffer, unprocessed, (unprocessed_length < md5::BLOCK_SIZE ? unprocessed_length : md5::BLOCK_SIZE));
@@ -79,9 +79,12 @@ namespace md5 {
 
             }
 
-            while (buffer_length_mod + >= md5::BLOCK_SIZE) {
-                memcpy(internal_buffer, buffer_, md5::BLOCK_SIZE);
-                buffer
+            while (buffer_length_mod >= md5::BLOCK_SIZE) {
+                memcpy(internal_buffer, buffer_ + processed_bytes, md5::BLOCK_SIZE);
+                buffer_length_mod -= md5::BLOCK_SIZE;
+                processed_bytes += md5::BLOCK_SIZE;
+
+                process_block_new(internal_buffer);
             }
 
 
@@ -242,7 +245,7 @@ namespace md5 {
 
             sig_to_string(signature, str, 33);
 
-            if (signature != NULL) {
+            if (signature_ != NULL) {
                 memcpy(signature_, static_cast<void*>(signature), MD5_SIZE);
             }
 
