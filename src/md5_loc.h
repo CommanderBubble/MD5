@@ -7,6 +7,8 @@
 #ifndef __MD5_LOC_H__
 #define __MD5_LOC_H__
 
+#include <iostream>
+
 /// For now we are assuming everything is in little endian byte-order
 
 namespace md5 {
@@ -54,26 +56,34 @@ namespace md5 {
     inline unsigned int I(unsigned int x, unsigned int y, unsigned int z) {return y ^ (x | ~z);};
 
     inline void FF(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
+//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i << "]: " << Xk << "\ns: " << S1[s] << "\nT: " << T[i] << "\n";
         a += F(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S1[s]);
         a += b;
+//        std::cout << "A = " << a << "\n";
     };
 
     inline void GG(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
+//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 16 << "]: " << Xk << "\ns: " << S2[s] << "\nT: " << T[i] << "\n";
         a += G(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S2[s]);
         a += b;
+//        std::cout << "A = " << a << "\n";
     };
 
     inline void HH(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
+//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 32 << "]: " << Xk << "\ns: " << S3[s] << "\nT: " << T[i] << "\n";
         a += H(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S3[s]);
         a += b;
+//        std::cout << "A = " << a << "\n";
     };
     inline void II(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
+//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 48 << "]: " << Xk << "\ns: " << S4[s] << "\nT: " << T[i] << "\n";
         a += I(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S4[s]);
         a += b;
+//        std::cout << "A = " << a << "\n";
     };
 
 
@@ -129,9 +139,11 @@ namespace md5 {
         do { \
             memcpy(c_p, b_p, sizeof(unsigned int)); \
             *c_p = MD5_SWAP(*c_p); \
+            /*std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << place++ << "]: " << *c_p << "\ns: " << s << "\nT: " << T << "\n";*/ \
             a += MD5_FF (b, c, d) + *c_p + T; \
             a = MD5_CYCLIC (a, s); \
             a += b; \
+            /*std::cout << "A = " << a << "\n";*/ \
             b_p = (char *)b_p + sizeof(unsigned int); \
             c_p++; \
         } while (0)
@@ -143,9 +155,11 @@ namespace md5 {
      */
     #define MD5_OP234(FUNC, a, b, c, d, k, s, T) \
         do { \
+            /*std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << place++ << "]: " << k << "\ns: " << s << "\nT: " << T << "\n";*/ \
             a += FUNC (b, c, d) + k + T; \
             a = MD5_CYCLIC (a, s); \
             a += b; \
+            /*std::cout << "A = " << a << "\n";*/ \
         } while (0)
 
     const char* HEX_STRING = "0123456789abcdef";    /* to convert to hex */
