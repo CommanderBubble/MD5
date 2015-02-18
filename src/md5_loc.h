@@ -37,6 +37,10 @@ namespace md5 {
     const unsigned int S3[4] = {4,  11, 16, 23};
     const unsigned int S4[4] = {6,  10, 15, 21};
 
+    inline unsigned int word_to_uint(const char* block, const unsigned int pos) {
+        return (block[pos] << 24) & (block[pos + 1] << 16) & (block[pos + 2] << 8) & (block[pos + 3]);
+    }
+
     /*
      * Function to perform the cyclic left rotation of blocks of data
      */

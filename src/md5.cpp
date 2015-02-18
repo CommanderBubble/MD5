@@ -63,6 +63,34 @@ namespace md5 {
         finish(signature);
     }
 
+    void md5_t::process_new(const void* buffer_, const unsigned int buffer_length_) {
+        if (!finished) {
+            char internal_buffer[md5::BLOCK_SIZE];
+            unsigned int buffer_length_mod;
+
+            if (unprocessed_length) {
+                memcpy(internal_buffer, unprocessed, (unprocessed_length < md5::BLOCK_SIZE ? unprocessed_length : md5::BLOCK_SIZE));
+                memcpy(internal_buffer + unprocessed_length, buffer_, md5::BLOCK_SIZE - unprocessed_length);
+
+                buffer_length_mod -= unprocessed_length;
+                unprocessed_length = 0;
+
+                process_block_new(internal_buffer);
+
+            }
+
+            while (buffer_length_mod + >= md5::BLOCK_SIZE) {
+                memcpy(internal_buffer, buffer_, md5::BLOCK_SIZE);
+                buffer
+            }
+
+
+
+        } else {
+            // throw error when trying to process after completion?
+        }
+    }
+
     /*
      * process
      *
@@ -303,14 +331,25 @@ namespace md5 {
 
     void md5_t::process_block_new(const char* block) {
     /* Process each 16-word block. */
-//    For i = 0 to N/16-1 do
-
-        unsigned int X[16];
 
         /* Copy block i into X. */
         //For j = 0 to 15 do
         //    Set X[j] to M[i*16+j].
         /* of loop on j */
+        unsigned int X[16];
+        for (unsigned int i = 0; i < 16; i++) {
+            X[i] = md5::word_to_uint(block, 4 * i);
+        }
+
+        /*
+         * we check for when the lower word rolls over, and increment the
+         * higher word. we do not need to worry if the higher word rolls over
+         * as only the two words we maintain are needed in the function later
+         *
+         */
+        if (message_length[0] + md5::BLOCK_SIZE < message_length[0])
+            message_length[1]++;
+        message_length[0] += md5::BLOCK_SIZE;
 
         /* Save A as AA, B as BB, C as CC, and D as DD. */
         unsigned int AA = A, BB = B, CC = C, DD = D;
@@ -324,22 +363,22 @@ namespace md5 {
          * [ABCD  8  7  9]  [DABC  9 12 10]  [CDAB 10 17 11]  [BCDA 11 22 12]
          * [ABCD 12  7 13]  [DABC 13 12 14]  [CDAB 14 17 15]  [BCDA 15 22 16]
          */
-        FF(A, B, C, D, X[0 ], 0, 0 );
-        FF(D, A, B, C, X[1 ], 1, 1 );
-        FF(C, D, A, B, X[2 ], 2, 2 );
-        FF(B, C, D, A, X[3 ], 3, 3 );
-        FF(A, B, C, D, X[4 ], 0, 4 );
-        FF(D, A, B, C, X[5 ], 1, 5 );
-        FF(C, D, A, B, X[6 ], 2, 6 );
-        FF(B, C, D, A, X[7 ], 3, 7 );
-        FF(A, B, C, D, X[8 ], 0, 8 );
-        FF(D, A, B, C, X[9 ], 1, 9 );
-        FF(C, D, A, B, X[10], 2, 10);
-        FF(B, C, D, A, X[11], 3, 11);
-        FF(A, B, C, D, X[12], 0, 12);
-        FF(D, A, B, C, X[13], 1, 13);
-        FF(C, D, A, B, X[14], 2, 14);
-        FF(B, C, D, A, X[15], 3, 15);
+        md5::FF(A, B, C, D, X[0 ], 0, 0 );
+        md5::FF(D, A, B, C, X[1 ], 1, 1 );
+        md5::FF(C, D, A, B, X[2 ], 2, 2 );
+        md5::FF(B, C, D, A, X[3 ], 3, 3 );
+        md5::FF(A, B, C, D, X[4 ], 0, 4 );
+        md5::FF(D, A, B, C, X[5 ], 1, 5 );
+        md5::FF(C, D, A, B, X[6 ], 2, 6 );
+        md5::FF(B, C, D, A, X[7 ], 3, 7 );
+        md5::FF(A, B, C, D, X[8 ], 0, 8 );
+        md5::FF(D, A, B, C, X[9 ], 1, 9 );
+        md5::FF(C, D, A, B, X[10], 2, 10);
+        md5::FF(B, C, D, A, X[11], 3, 11);
+        md5::FF(A, B, C, D, X[12], 0, 12);
+        md5::FF(D, A, B, C, X[13], 1, 13);
+        md5::FF(C, D, A, B, X[14], 2, 14);
+        md5::FF(B, C, D, A, X[15], 3, 15);
 
         /* Round 2
          * Let [abcd k s i] denote the operation
@@ -350,22 +389,22 @@ namespace md5 {
          * [ABCD  9  5 25]  [DABC 14  9 26]  [CDAB  3 14 27]  [BCDA  8 20 28]
          * [ABCD 13  5 29]  [DABC  2  9 30]  [CDAB  7 14 31]  [BCDA 12 20 32]
          */
-        GG(A, B, C, D, X[1 ], 0, 16);
-        GG(D, A, B, C, X[6 ], 1, 17);
-        GG(C, D, A, B, X[11], 2, 18);
-        GG(B, C, D, A, X[0 ], 3, 19);
-        GG(A, B, C, D, X[5 ], 0, 20);
-        GG(D, A, B, C, X[10], 1, 21);
-        GG(C, D, A, B, X[15], 2, 22);
-        GG(B, C, D, A, X[4 ], 3, 23);
-        GG(A, B, C, D, X[9 ], 0, 24);
-        GG(D, A, B, C, X[14], 1, 25);
-        GG(C, D, A, B, X[3 ], 2, 26);
-        GG(B, C, D, A, X[8 ], 3, 27);
-        GG(A, B, C, D, X[13], 0, 28);
-        GG(D, A, B, C, X[2 ], 1, 29);
-        GG(C, D, A, B, X[7 ], 2, 30);
-        GG(B, C, D, A, X[12], 3, 31);
+        md5::GG(A, B, C, D, X[1 ], 0, 16);
+        md5::GG(D, A, B, C, X[6 ], 1, 17);
+        md5::GG(C, D, A, B, X[11], 2, 18);
+        md5::GG(B, C, D, A, X[0 ], 3, 19);
+        md5::GG(A, B, C, D, X[5 ], 0, 20);
+        md5::GG(D, A, B, C, X[10], 1, 21);
+        md5::GG(C, D, A, B, X[15], 2, 22);
+        md5::GG(B, C, D, A, X[4 ], 3, 23);
+        md5::GG(A, B, C, D, X[9 ], 0, 24);
+        md5::GG(D, A, B, C, X[14], 1, 25);
+        md5::GG(C, D, A, B, X[3 ], 2, 26);
+        md5::GG(B, C, D, A, X[8 ], 3, 27);
+        md5::GG(A, B, C, D, X[13], 0, 28);
+        md5::GG(D, A, B, C, X[2 ], 1, 29);
+        md5::GG(C, D, A, B, X[7 ], 2, 30);
+        md5::GG(B, C, D, A, X[12], 3, 31);
 
         /* Round 3
          * Let [abcd k s i] denote the operation
@@ -376,22 +415,22 @@ namespace md5 {
          * [ABCD 13  4 41]  [DABC  0 11 42]  [CDAB  3 16 43]  [BCDA  6 23 44]
          * [ABCD  9  4 45]  [DABC 12 11 46]  [CDAB 15 16 47]  [BCDA  2 23 48]
          */
-        HH(A, B, C, D, X[5 ], 0, 32);
-        HH(D, A, B, C, X[8 ], 1, 33);
-        HH(C, D, A, B, X[11], 2, 34);
-        HH(B, C, D, A, X[14], 3, 35);
-        HH(A, B, C, D, X[1 ], 0, 36);
-        HH(D, A, B, C, X[4 ], 1, 37);
-        HH(C, D, A, B, X[7 ], 2, 38);
-        HH(B, C, D, A, X[10], 3, 39);
-        HH(A, B, C, D, X[13], 0, 40);
-        HH(D, A, B, C, X[0 ], 1, 41);
-        HH(C, D, A, B, X[3 ], 2, 42);
-        HH(B, C, D, A, X[6 ], 3, 43);
-        HH(A, B, C, D, X[9 ], 0, 44);
-        HH(D, A, B, C, X[12], 1, 45);
-        HH(C, D, A, B, X[15], 2, 46);
-        HH(B, C, D, A, X[2 ], 3, 47);
+        md5::HH(A, B, C, D, X[5 ], 0, 32);
+        md5::HH(D, A, B, C, X[8 ], 1, 33);
+        md5::HH(C, D, A, B, X[11], 2, 34);
+        md5::HH(B, C, D, A, X[14], 3, 35);
+        md5::HH(A, B, C, D, X[1 ], 0, 36);
+        md5::HH(D, A, B, C, X[4 ], 1, 37);
+        md5::HH(C, D, A, B, X[7 ], 2, 38);
+        md5::HH(B, C, D, A, X[10], 3, 39);
+        md5::HH(A, B, C, D, X[13], 0, 40);
+        md5::HH(D, A, B, C, X[0 ], 1, 41);
+        md5::HH(C, D, A, B, X[3 ], 2, 42);
+        md5::HH(B, C, D, A, X[6 ], 3, 43);
+        md5::HH(A, B, C, D, X[9 ], 0, 44);
+        md5::HH(D, A, B, C, X[12], 1, 45);
+        md5::HH(C, D, A, B, X[15], 2, 46);
+        md5::HH(B, C, D, A, X[2 ], 3, 47);
 
         /* Round 4
          * Let [abcd k s i] denote the operation
@@ -402,22 +441,22 @@ namespace md5 {
          * [ABCD  8  6 57]  [DABC 15 10 58]  [CDAB  6 15 59]  [BCDA 13 21 60]
          * [ABCD  4  6 61]  [DABC 11 10 62]  [CDAB  2 15 63]  [BCDA  9 21 64]
          */
-        II(A, B, C, D, X[0 ], 0, 48);
-        II(D, A, B, C, X[7 ], 1, 49);
-        II(C, D, A, B, X[14], 2, 50);
-        II(B, C, D, A, X[5 ], 3, 51);
-        II(A, B, C, D, X[12], 0, 52);
-        II(D, A, B, C, X[3 ], 1, 53);
-        II(C, D, A, B, X[10], 2, 54);
-        II(B, C, D, A, X[1 ], 3, 55);
-        II(A, B, C, D, X[8 ], 0, 56);
-        II(D, A, B, C, X[15], 1, 57);
-        II(C, D, A, B, X[6 ], 2, 58);
-        II(B, C, D, A, X[13], 3, 59);
-        II(A, B, C, D, X[4 ], 0, 60);
-        II(D, A, B, C, X[11], 1, 61);
-        II(C, D, A, B, X[2 ], 2, 62);
-        II(B, C, D, A, X[9 ], 3, 63);
+        md5::II(A, B, C, D, X[0 ], 0, 48);
+        md5::II(D, A, B, C, X[7 ], 1, 49);
+        md5::II(C, D, A, B, X[14], 2, 50);
+        md5::II(B, C, D, A, X[5 ], 3, 51);
+        md5::II(A, B, C, D, X[12], 0, 52);
+        md5::II(D, A, B, C, X[3 ], 1, 53);
+        md5::II(C, D, A, B, X[10], 2, 54);
+        md5::II(B, C, D, A, X[1 ], 3, 55);
+        md5::II(A, B, C, D, X[8 ], 0, 56);
+        md5::II(D, A, B, C, X[15], 1, 57);
+        md5::II(C, D, A, B, X[6 ], 2, 58);
+        md5::II(B, C, D, A, X[13], 3, 59);
+        md5::II(A, B, C, D, X[4 ], 0, 60);
+        md5::II(D, A, B, C, X[11], 1, 61);
+        md5::II(C, D, A, B, X[2 ], 2, 62);
+        md5::II(B, C, D, A, X[9 ], 3, 63);
 
         /* Then perform the following additions. (That is increment each
         of the four registers by the value it had before this block
@@ -426,8 +465,6 @@ namespace md5 {
         B += BB;
         C += CC;
         D += DD;
-
-    /* of loop on i */
     }
 
     /*
@@ -452,15 +489,9 @@ namespace md5 {
         const void* buf_p = buffer_;
         const void* end_p;
         unsigned int words_n;
-        unsigned int A, B, C, D;
 
         words_n = buf_len_ / sizeof(unsigned int);
         end_p = (char*)buf_p + words_n * sizeof(unsigned int);
-
-        A = A;
-        B = B;
-        C = C;
-        D = D;
 
         /*
          * First increment the byte count.  RFC 1321 specifies the possible
@@ -480,13 +511,13 @@ namespace md5 {
          * round of the loop.
          */
         while (buf_p < end_p) {
-            unsigned int A_save, B_save, C_save, D_save;
+            unsigned int AA, BB, CC, DD;
             unsigned int* corr_p = correct;
 
-            A_save = A;
-            B_save = B;
-            C_save = C;
-            D_save = D;
+            AA = A;
+            BB = B;
+            CC = C;
+            DD = D;
 
             /*
              * Before we start, one word to the strange constants.  They are
@@ -568,17 +599,11 @@ namespace md5 {
             MD5_OP234(MD5_FI, B, C, D, A, correct[  9], 21, 0xeb86d391);
 
             /* Add the starting values of the context. */
-            A += A_save;
-            B += B_save;
-            C += C_save;
-            D += D_save;
+            A += AA;
+            B += BB;
+            C += CC;
+            D += DD;
         }
-
-        /* Put checksum in context given as argument. */
-        md_A = A;
-        md_B = B;
-        md_C = C;
-        md_D = D;
     }
 
     /*
@@ -601,19 +626,19 @@ namespace md5 {
         unsigned int hold;
         void* res_p = result;
 
-        hold = MD5_SWAP(md_A);
+        hold = MD5_SWAP(A);
         memcpy(res_p, &hold, sizeof(unsigned int));
         res_p = (char*)res_p + sizeof(unsigned int);
 
-        hold = MD5_SWAP(md_B);
+        hold = MD5_SWAP(B);
         memcpy(res_p, &hold, sizeof(unsigned int));
         res_p = (char*)res_p + sizeof(unsigned int);
 
-        hold = MD5_SWAP(md_C);
+        hold = MD5_SWAP(C);
         memcpy(res_p, &hold, sizeof(unsigned int));
         res_p = (char*)res_p + sizeof(unsigned int);
 
-        hold = MD5_SWAP(md_D);
+        hold = MD5_SWAP(D);
         memcpy(res_p, &hold, sizeof(unsigned int));
     }
 
