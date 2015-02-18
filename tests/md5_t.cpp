@@ -25,7 +25,7 @@ static void print_sig(const unsigned char *sig) {
 /*
  * Read in from stdin and run MD5 on the input
  */
-static void read_file(const char* filename) {
+int read_file(const char* filename) {
     unsigned char sig[MD5_SIZE];
     char buffer[4096];
     md5::md5_t md5;
@@ -73,7 +73,9 @@ static void read_file(const char* filename) {
     (void)printf("'\n");
 }
 
-static void run_tests(void) {
+void run_tests() {
+    int ret = 0;
+
     unsigned char sig[MD5_SIZE], sig2[MD5_SIZE];
     char str[MD5_STRING_SIZE];
 
@@ -91,6 +93,23 @@ static void run_tests(void) {
     tests.push_back(std::pair<const char*, const char*>("This string is exactly 64 characters long for a very good reason", "655c37c2c8451a60306d09f2971e49ff"));
     tests.push_back(std::pair<const char*, const char*>("This string is also a specific length.  It is exactly 128 characters long for a very good reason as well. We are testing bounds.", "2ac62baa5be7fa36587c55691c026b35"));
 
+    tests.push_back(std::pair<const char*, const char*>("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "31e4d9c6d74cd592b78f77f72965d6ab"));
+    tests.push_back(std::pair<const char*, const char*>("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "476389bd400f5643ffdcc4c202edb993"));
+
+    std::vector<unsigned int> multiplier;
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(1);
+    multiplier.push_back(8388608);
+    multiplier.push_back(18433336);
+
     int passed = 0;
     int passed_h = 0;
     int passed_c = 0;
@@ -101,7 +120,13 @@ static void run_tests(void) {
         bool passed_convert = 0;
 
         /* calculate the sig for our test string */
-        md5::md5_t md5(tests[i].first, strlen(tests[i].first), sig);
+        md5::md5_t md5;
+
+        for (unsigned int j = 0; j < multiplier[i]; j++) {
+            md5.process(tests[i].first, strlen(tests[i].first));
+        }
+
+        md5.finish(sig);
 
         /* convert from the sig to a string rep */
         md5::sig_to_string(sig, str, sizeof(str));
@@ -122,17 +147,21 @@ static void run_tests(void) {
             passed++;
         } else {
             std::cout << "TEST " << i + 1 << " FAILED" << std::endl;
+            std::cout << "Hash: " << str << std::endl;
         }
     }
 
     std::cout << std::endl << "*******************************" << std::endl
               << "    " << passed << " of " << tests.size() << " tests passed" << std::endl;
     if (passed != tests.size()) {
+        ret = 1;
         std::cout << std::endl << "   Please notify developer" << std::endl;
         std::cout << "  " << passed_h << " passed hashing check" << std::endl
                   << "  " << passed_h << " passed comparison check" << std::endl;
     }
     std::cout << "*******************************" << std::endl;
+
+    exit(ret);
 }
 
 /*
