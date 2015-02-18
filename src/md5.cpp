@@ -48,16 +48,16 @@ namespace md5 {
      *
      * buffer - A buffer of bytes whose MD5 signature we are calculating.
      *
-     * buf_len - The length of the buffer.
+     * buf_len_ - The length of the buffer.
      *
      * signature - A 16 byte buffer that will contain the MD5 signature.
      */
-    md5_t::md5_t(const char* buffer, const unsigned int buf_len, void* signature) {
+    md5_t::md5_t(const char* buffer_, const unsigned int buf_len_, void* signature) {
         /* initialize the computation context */
         initialise();
 
-        /* process whole buffer but last buf_len % MD5_BLOCK bytes */
-        process(buffer, buf_len);
+        /* process whole buffer but last buf_len_ % MD5_BLOCK bytes */
+        process(buffer_, buf_len_);
 
         /* put result in desired memory area */
         finish(signature);
@@ -79,11 +79,11 @@ namespace md5 {
      *
      * buffer - A buffer of bytes whose MD5 signature we are calculating.
      *
-     * buf_len - The length of the buffer.
+     * buf_len_ - The length of the buffer.
      */
-    void md5_t::process(const void* buffer, const unsigned int buf_len) {
+    void md5_t::process(const void* buffer_, const unsigned int buf_len_) {
         if (!finished) {
-            unsigned int len = buf_len;
+            unsigned int len = buf_len_;
             unsigned int in_block, add;
 
             /*
@@ -91,42 +91,42 @@ namespace md5 {
              * from the user to fill the block.
              */
 
-            if (md_buf_len > 0) {
-                in_block = md_buf_len;
-                if (in_block + len > sizeof(md_buffer)) {
-                    add = sizeof(md_buffer) - in_block;
+            if (buf_len > 0) {
+                in_block = buf_len;
+                if (in_block + len > sizeof(buffer)) {
+                    add = sizeof(buffer) - in_block;
                 } else {
                     add = len;
                 }
 
-                memcpy(md_buffer + in_block, buffer, add);
-                md_buf_len += add;
+                memcpy(buffer + in_block, buffer_, add);
+                buf_len += add;
                 in_block += add;
 
                 if (in_block > md5::BLOCK_SIZE) {
-                    process_block(md_buffer, in_block & ~md5::BLOCK_SIZE_MASK);
+                    process_block(buffer, in_block & ~md5::BLOCK_SIZE_MASK);
                     /* the regions in the following copy operation will not overlap. */
-                    memcpy(md_buffer,
-                    md_buffer + (in_block & ~md5::BLOCK_SIZE_MASK),
+                    memcpy(buffer,
+                    buffer + (in_block & ~md5::BLOCK_SIZE_MASK),
                     in_block & md5::BLOCK_SIZE_MASK);
-                    md_buf_len = in_block & md5::BLOCK_SIZE_MASK;
+                    buf_len = in_block & md5::BLOCK_SIZE_MASK;
                 }
 
-                buffer = (const char*)buffer + add;
+                buffer_ = (const char*)buffer_ + add;
                 len -= add;
             }
 
             /* process available complete blocks right from the user buffer */
             if (len > md5::BLOCK_SIZE) {
-                process_block(buffer, len & ~md5::BLOCK_SIZE_MASK);
-                buffer = (const char*) buffer + (len & ~md5::BLOCK_SIZE_MASK);
+                process_block(buffer_, len & ~md5::BLOCK_SIZE_MASK);
+                buffer_ = (const char*) buffer_ + (len & ~md5::BLOCK_SIZE_MASK);
                 len &= md5::BLOCK_SIZE_MASK;
             }
 
             /* copy remaining bytes into the internal buffer */
             if (len > 0) {
-                memcpy(md_buffer, buffer, len);
-                md_buf_len = len;
+                memcpy(buffer, buffer_, len);
+                buf_len = len;
             }
         } else {
             // add error?
@@ -157,17 +157,17 @@ namespace md5 {
             int pad;
 
             /* take yet unprocessed bytes into account */
-            bytes = md_buf_len;
+            bytes = buf_len;
 
             /*
              * Count remaining bytes.  Modified to do this to better avoid
              * overflows in the lower word -- Gray 10/97.
              */
-            if (md_total[0] > UINT32_MAX - bytes) {
-                md_total[1]++;
-                md_total[0] -= (UINT32_MAX + 1 - bytes);
+            if (total[0] > UINT32_MAX - bytes) {
+                total[1]++;
+                total[0] -= (UINT32_MAX + 1 - bytes);
             } else {
-                md_total[0] += bytes;
+                total[0] += bytes;
             }
 
             /*
@@ -187,9 +187,9 @@ namespace md5 {
              */
             if (pad > 0) {
                 /* some sort of padding start byte */
-                md_buffer[bytes] = (unsigned char)0x80;
+                buffer[bytes] = (unsigned char)0x80;
                 if (pad > 1) {
-                    memset(md_buffer + bytes + 1, 0, pad - 1);
+                    memset(buffer + bytes + 1, 0, pad - 1);
                 }
                 bytes += pad;
             }
@@ -198,17 +198,17 @@ namespace md5 {
              * Put the 64-bit file length in _bits_ (i.e. *8) at the end of the
              * buffer.
              */
-            hold = MD5_SWAP((md_total[0] & 0x1FFFFFFF) << 3);
-            memcpy(md_buffer + bytes, &hold, sizeof(unsigned int));
+            hold = MD5_SWAP((total[0] & 0x1FFFFFFF) << 3);
+            memcpy(buffer + bytes, &hold, sizeof(unsigned int));
             bytes += sizeof(unsigned int);
 
             /* shift the high word over by 3 and add in the top 3 bits from the low */
-            hold = MD5_SWAP((md_total[1] << 3) | ((md_total[0] & 0xE0000000) >> 29));
-            memcpy(md_buffer + bytes, &hold, sizeof(unsigned int));
+            hold = MD5_SWAP((total[1] << 3) | ((total[0] & 0xE0000000) >> 29));
+            memcpy(buffer + bytes, &hold, sizeof(unsigned int));
             bytes += sizeof(unsigned int);
 
             /* process last bytes, the padding chars, and size words */
-            process_block(md_buffer, bytes);
+            process_block(buffer, bytes);
 
             get_result(static_cast<void*>(signature));
 
@@ -294,21 +294,23 @@ namespace md5 {
         C = 0x98badcfe;
         D = 0x10325476;
 
-//        md_total[0] = 0;
-//        md_total[1] = 0;
-//        md_buf_len = 0;
+        total[0] = 0;
+        total[1] = 0;
+        buf_len = 0;
 
         finished = false;
     }
 
-    void md5_t::process_block_new() {
+    void md5_t::process_block_new(const char* block) {
     /* Process each 16-word block. */
 //    For i = 0 to N/16-1 do
 
+        unsigned int X[16];
+
         /* Copy block i into X. */
-        For j = 0 to 15 do
-            Set X[j] to M[i*16+j].
-        end /* of loop on j */
+        //For j = 0 to 15 do
+        //    Set X[j] to M[i*16+j].
+        /* of loop on j */
 
         /* Save A as AA, B as BB, C as CC, and D as DD. */
         unsigned int AA = A, BB = B, CC = C, DD = D;
@@ -322,22 +324,22 @@ namespace md5 {
          * [ABCD  8  7  9]  [DABC  9 12 10]  [CDAB 10 17 11]  [BCDA 11 22 12]
          * [ABCD 12  7 13]  [DABC 13 12 14]  [CDAB 14 17 15]  [BCDA 15 22 16]
          */
-        FF(A, B, C, D, X[0 ], , 0 );
-        FF(D, A, B, C, X[1 ], , 1 );
-        FF(C, D, A, B, X[2 ], , 2 );
-        FF(B, C, D, A, X[3 ], , 3 );
-        FF(A, B, C, D, X[4 ], , 4 );
-        FF(D, A, B, C, X[5 ], , 5 );
-        FF(C, D, A, B, X[6 ], , 6 );
-        FF(B, C, D, A, X[7 ], , 7 );
-        FF(A, B, C, D, X[8 ], , 8 );
-        FF(D, A, B, C, X[9 ], , 9 );
-        FF(C, D, A, B, X[10], , 10);
-        FF(B, C, D, A, X[11], , 11);
-        FF(A, B, C, D, X[12], , 12);
-        FF(D, A, B, C, X[13], , 13);
-        FF(C, D, A, B, X[14], , 14);
-        FF(B, C, D, A, X[15], , 15);
+        FF(A, B, C, D, X[0 ], 0, 0 );
+        FF(D, A, B, C, X[1 ], 1, 1 );
+        FF(C, D, A, B, X[2 ], 2, 2 );
+        FF(B, C, D, A, X[3 ], 3, 3 );
+        FF(A, B, C, D, X[4 ], 0, 4 );
+        FF(D, A, B, C, X[5 ], 1, 5 );
+        FF(C, D, A, B, X[6 ], 2, 6 );
+        FF(B, C, D, A, X[7 ], 3, 7 );
+        FF(A, B, C, D, X[8 ], 0, 8 );
+        FF(D, A, B, C, X[9 ], 1, 9 );
+        FF(C, D, A, B, X[10], 2, 10);
+        FF(B, C, D, A, X[11], 3, 11);
+        FF(A, B, C, D, X[12], 0, 12);
+        FF(D, A, B, C, X[13], 1, 13);
+        FF(C, D, A, B, X[14], 2, 14);
+        FF(B, C, D, A, X[15], 3, 15);
 
         /* Round 2
          * Let [abcd k s i] denote the operation
@@ -348,22 +350,22 @@ namespace md5 {
          * [ABCD  9  5 25]  [DABC 14  9 26]  [CDAB  3 14 27]  [BCDA  8 20 28]
          * [ABCD 13  5 29]  [DABC  2  9 30]  [CDAB  7 14 31]  [BCDA 12 20 32]
          */
-        GG(A, B, C, D, 0,  X[], 16);
-        GG(D, A, B, C, 1,  X[], 17);
-        GG(C, D, A, B, 2,  X[], 18);
-        GG(B, C, D, A, 3,  X[], 19);
-        GG(A, B, C, D, 4,  X[], 20);
-        GG(D, A, B, C, 5,  X[], 21);
-        GG(C, D, A, B, 6,  X[], 22);
-        GG(B, C, D, A, 7,  X[], 23);
-        GG(A, B, C, D, 8,  X[], 24);
-        GG(D, A, B, C, 9,  X[], 25);
-        GG(C, D, A, B, 10, X[], 26);
-        GG(B, C, D, A, 11, X[], 27);
-        GG(A, B, C, D, 12, X[], 28);
-        GG(D, A, B, C, 13, X[], 29);
-        GG(C, D, A, B, 14, X[], 30);
-        GG(B, C, D, A, 15, X[], 31);
+        GG(A, B, C, D, X[1 ], 0, 16);
+        GG(D, A, B, C, X[6 ], 1, 17);
+        GG(C, D, A, B, X[11], 2, 18);
+        GG(B, C, D, A, X[0 ], 3, 19);
+        GG(A, B, C, D, X[5 ], 0, 20);
+        GG(D, A, B, C, X[10], 1, 21);
+        GG(C, D, A, B, X[15], 2, 22);
+        GG(B, C, D, A, X[4 ], 3, 23);
+        GG(A, B, C, D, X[9 ], 0, 24);
+        GG(D, A, B, C, X[14], 1, 25);
+        GG(C, D, A, B, X[3 ], 2, 26);
+        GG(B, C, D, A, X[8 ], 3, 27);
+        GG(A, B, C, D, X[13], 0, 28);
+        GG(D, A, B, C, X[2 ], 1, 29);
+        GG(C, D, A, B, X[7 ], 2, 30);
+        GG(B, C, D, A, X[12], 3, 31);
 
         /* Round 3
          * Let [abcd k s i] denote the operation
@@ -374,22 +376,22 @@ namespace md5 {
          * [ABCD 13  4 41]  [DABC  0 11 42]  [CDAB  3 16 43]  [BCDA  6 23 44]
          * [ABCD  9  4 45]  [DABC 12 11 46]  [CDAB 15 16 47]  [BCDA  2 23 48]
          */
-        HH(A, B, C, D, 0,  X[], 32);
-        HH(D, A, B, C, 1,  X[], 33);
-        HH(C, D, A, B, 2,  X[], 34);
-        HH(B, C, D, A, 3,  X[], 35);
-        HH(A, B, C, D, 4,  X[], 36);
-        HH(D, A, B, C, 5,  X[], 37);
-        HH(C, D, A, B, 6,  X[], 38);
-        HH(B, C, D, A, 7,  X[], 39);
-        HH(A, B, C, D, 8,  X[], 40);
-        HH(D, A, B, C, 9,  X[], 41);
-        HH(C, D, A, B, 10, X[], 42);
-        HH(B, C, D, A, 11, X[], 43);
-        HH(A, B, C, D, 12, X[], 44);
-        HH(D, A, B, C, 13, X[], 45);
-        HH(C, D, A, B, 14, X[], 46);
-        HH(B, C, D, A, 15, X[], 47);
+        HH(A, B, C, D, X[5 ], 0, 32);
+        HH(D, A, B, C, X[8 ], 1, 33);
+        HH(C, D, A, B, X[11], 2, 34);
+        HH(B, C, D, A, X[14], 3, 35);
+        HH(A, B, C, D, X[1 ], 0, 36);
+        HH(D, A, B, C, X[4 ], 1, 37);
+        HH(C, D, A, B, X[7 ], 2, 38);
+        HH(B, C, D, A, X[10], 3, 39);
+        HH(A, B, C, D, X[13], 0, 40);
+        HH(D, A, B, C, X[0 ], 1, 41);
+        HH(C, D, A, B, X[3 ], 2, 42);
+        HH(B, C, D, A, X[6 ], 3, 43);
+        HH(A, B, C, D, X[9 ], 0, 44);
+        HH(D, A, B, C, X[12], 1, 45);
+        HH(C, D, A, B, X[15], 2, 46);
+        HH(B, C, D, A, X[2 ], 3, 47);
 
         /* Round 4
          * Let [abcd k s i] denote the operation
@@ -400,22 +402,22 @@ namespace md5 {
          * [ABCD  8  6 57]  [DABC 15 10 58]  [CDAB  6 15 59]  [BCDA 13 21 60]
          * [ABCD  4  6 61]  [DABC 11 10 62]  [CDAB  2 15 63]  [BCDA  9 21 64]
          */
-        II(A, B, C, D, 0,  X[], 48);
-        II(D, A, B, C, 1,  X[], 49);
-        II(C, D, A, B, 2,  X[], 50);
-        II(B, C, D, A, 3,  X[], 51);
-        II(A, B, C, D, 4,  X[], 52);
-        II(D, A, B, C, 5,  X[], 53);
-        II(C, D, A, B, 6,  X[], 54);
-        II(B, C, D, A, 7,  X[], 55);
-        II(A, B, C, D, 8,  X[], 56);
-        II(D, A, B, C, 9,  X[], 57);
-        II(C, D, A, B, 10, X[], 58);
-        II(B, C, D, A, 11, X[], 59);
-        II(A, B, C, D, 12, X[], 60);
-        II(D, A, B, C, 13, X[], 61);
-        II(C, D, A, B, 14, X[], 62);
-        II(B, C, D, A, 15, X[], 63);
+        II(A, B, C, D, X[0 ], 0, 48);
+        II(D, A, B, C, X[7 ], 1, 49);
+        II(C, D, A, B, X[14], 2, 50);
+        II(B, C, D, A, X[5 ], 3, 51);
+        II(A, B, C, D, X[12], 0, 52);
+        II(D, A, B, C, X[3 ], 1, 53);
+        II(C, D, A, B, X[10], 2, 54);
+        II(B, C, D, A, X[1 ], 3, 55);
+        II(A, B, C, D, X[8 ], 0, 56);
+        II(D, A, B, C, X[15], 1, 57);
+        II(C, D, A, B, X[6 ], 2, 58);
+        II(B, C, D, A, X[13], 3, 59);
+        II(A, B, C, D, X[4 ], 0, 60);
+        II(D, A, B, C, X[11], 1, 61);
+        II(C, D, A, B, X[2 ], 2, 62);
+        II(B, C, D, A, X[9 ], 3, 63);
 
         /* Then perform the following additions. (That is increment each
         of the four registers by the value it had before this block
@@ -425,7 +427,7 @@ namespace md5 {
         C += CC;
         D += DD;
 
-    end /* of loop on i */
+    /* of loop on i */
     }
 
     /*
@@ -445,20 +447,20 @@ namespace md5 {
      *
      * buf_len - The length of the buffer.
      */
-    void md5_t::process_block(const void *buffer, const unsigned int buf_len) {
+    void md5_t::process_block(const void *buffer_, const unsigned int buf_len_) {
         unsigned int correct[16];
-        const void* buf_p = buffer;
+        const void* buf_p = buffer_;
         const void* end_p;
         unsigned int words_n;
         unsigned int A, B, C, D;
 
-        words_n = buf_len / sizeof(unsigned int);
+        words_n = buf_len_ / sizeof(unsigned int);
         end_p = (char*)buf_p + words_n * sizeof(unsigned int);
 
-        A = md_A;
-        B = md_B;
-        C = md_C;
-        D = md_D;
+        A = A;
+        B = B;
+        C = C;
+        D = D;
 
         /*
          * First increment the byte count.  RFC 1321 specifies the possible
@@ -466,11 +468,11 @@ namespace md5 {
          * number of bytes with a double word increment.  Modified to do
          * this to better avoid overflows in the lower word -- Gray 10/97.
          */
-        if (md_total[0] > UINT32_MAX - buf_len) {
-            md_total[1]++;
-            md_total[0] -= (UINT32_MAX + 1 - buf_len);
+        if (total[0] > UINT32_MAX - buf_len_) {
+            total[1]++;
+            total[0] -= (UINT32_MAX + 1 - buf_len_);
         } else {
-            md_total[0] += buf_len;
+            total[0] += buf_len_;
         }
 
         /*

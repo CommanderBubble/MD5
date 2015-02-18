@@ -7,25 +7,20 @@
 #ifndef __MD5_LOC_H__
 #define __MD5_LOC_H__
 
+/// For now we are assuming everything is in little endian byte-order
+
 namespace md5 {
-    /*
-     * The MD5 algorithm works on blocks of characters of 64 bytes.  This
-     * is an internal value only and is not necessary for external use.
-     */
-    const unsigned int BLOCK_SIZE = 64;
     const unsigned int BLOCK_SIZE_MASK = md5::BLOCK_SIZE - 1;
 
     /*
      * NOTE: the following is assumed to generate a 32-bit unsigned data
      * type.
      */
-//    #define MAX_MD5_UINT32 ((unsigned int)4294967295U)
     const unsigned int UINT32_MAX = 4294967295U;
 
     /*
-     *
-     *
-     *
+     * T denotes the integer part of the i-th element of the function:
+     * T[i] = 4294967296 * abs(sin(i)), where i is in radians.
      */
     const unsigned int T[64] = {
         0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501, 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be, 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
@@ -34,15 +29,17 @@ namespace md5 {
         0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039, 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1, 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1, 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
     };
 
-
     /*
-     * Constants for the MD% Transform routine as defined in RFC 1321
+     * Constants for the MD5 Transform routine as defined in RFC 1321
      */
     const unsigned int S1[4] = {7,  12, 17, 22};
     const unsigned int S2[4] = {5,  9,  14, 20};
     const unsigned int S3[4] = {4,  11, 16, 23};
     const unsigned int S4[4] = {6,  10, 15, 21};
 
+    /*
+     * Function to perform the cyclic left rotation of blocks of data
+     */
     inline unsigned int cyclic_left_rotate(unsigned int data, unsigned int shift_bits) {
         return (data << shift_bits) | (data >> (32 - shift_bits));
     }
@@ -74,11 +71,6 @@ namespace md5 {
         a = cyclic_left_rotate(a, S4[s]);
         a += b;
     };
-
-    /* a = b + ((a + F(b, c, d) + X[k] + T[i]) <<< s). */
-
-
-
 
 
     /*

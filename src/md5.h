@@ -12,6 +12,11 @@ const unsigned int MD5_SIZE = (4 * sizeof(unsigned int));   /* 16 */
 const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
 
  namespace md5 {
+    /*
+     * The MD5 algorithm works on blocks of characters of 64 bytes.  This
+     * is an internal value only and is not necessary for external use.
+     */
+    const unsigned int BLOCK_SIZE = 64;
 
     class md5_t {
         public:
@@ -141,7 +146,7 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
             /* internal functions */
             void initialise();
             void process_block(const void*, const unsigned int);
-            void process_block_new();
+            void process_block_new(const char*);
             void get_result(void*);
 
             unsigned int A;                         /* accumulator 1 */
@@ -149,11 +154,11 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
             unsigned int C;                         /* accumulator 3 */
             unsigned int D;                         /* accumulator 4 */
 
+            unsigned int size[2];                   /* length of data */
 
-
-//            unsigned int total[2];                  /* totalling storage */
-//            unsigned int buf_len;                   /* length of the storage buffer */
-//            char md_buffer[md5::BLOCK_SIZE * 2];    /* character storage buffer */
+            unsigned int total[2];                  /* totalling storage */
+            unsigned int buf_len;                   /* length of the storage buffer */
+            char buffer[md5::BLOCK_SIZE * 2];       /* character storage buffer */
 
             bool finished;                          /* object state */
 
