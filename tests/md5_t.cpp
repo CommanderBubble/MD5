@@ -93,6 +93,7 @@ void run_tests() {
     tests.push_back(std::pair<const char*, const char*>("This string is exactly 64 characters long for a very good reason", "655c37c2c8451a60306d09f2971e49ff"));
     tests.push_back(std::pair<const char*, const char*>("This string is also a specific length.  It is exactly 128 characters long for a very good reason as well. We are testing bounds.", "2ac62baa5be7fa36587c55691c026b35"));
 
+    tests.push_back(std::pair<const char*, const char*>("aaaaaaaaaa", "7aaa7dec709fa4fa82f3746abfd80bdb"));
     tests.push_back(std::pair<const char*, const char*>("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "31e4d9c6d74cd592b78f77f72965d6ab"));
     tests.push_back(std::pair<const char*, const char*>("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "476389bd400f5643ffdcc4c202edb993"));
 
@@ -107,6 +108,7 @@ void run_tests() {
     multiplier.push_back(1);
     multiplier.push_back(1);
     multiplier.push_back(1);
+    multiplier.push_back(500);
     multiplier.push_back(8388608);
     multiplier.push_back(18433336);
 
