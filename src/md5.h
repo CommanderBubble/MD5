@@ -82,8 +82,8 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              *
              * buf_len - The length of the buffer.
              */
-            void process_new(const void* buffer_, const unsigned int buffer_length_);
-            void process(const void* buffer_, const unsigned int buf_len_);
+            void process(const void* buffer_, const unsigned int buffer_length_);
+            void process_old(const void* buffer_, const unsigned int buf_len_);
 
             /*
              * finish
@@ -103,8 +103,8 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              *
              * signature_ - A 16 byte buffer that will contain the MD5 signature.
              */
-            void finish_new(void* signature_ = NULL);
             void finish(void* signature_ = NULL);
+            void finish_old(void* signature_ = NULL);
 
             /*
              * get_sig
@@ -147,8 +147,8 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
         private:
             /* internal functions */
             void initialise();
-            void process_block(const void*, const unsigned int);
-            void process_block_new(const void*);
+            void process_block(const void*);
+            void process_block_old(const void*, const unsigned int);
             void get_result(void*);
 
             unsigned int A;                         /* accumulator 1 */
