@@ -33,5 +33,4 @@ configure
 makefile
 config.*
 autom4te.cache
-conf.h
-conf.h.in
+conf.*
