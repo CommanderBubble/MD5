@@ -7,7 +7,13 @@
 #ifndef __MD5_LOC_H__
 #define __MD5_LOC_H__
 
-#include <iostream>
+/*
+ * We don't include "conf.h" here because it gets included before this file in md5.cpp so the defines
+ * are correctly determing before they are checked.
+ */
+ #ifdef MD5_DEBUG
+    #include <iostream>
+#endif // MD5_DEBUG
 
 /// For now we are assuming everything is in little endian byte-order
 
@@ -56,36 +62,59 @@ namespace md5 {
     inline unsigned int I(unsigned int x, unsigned int y, unsigned int z) {return y ^ (x | ~z);};
 
     inline void FF(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i << "]: " << Xk << "\ns: " << S1[s] << "\nT: " << T[i] << "\n";
+        #ifdef MD5_DEBUG
+            std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i << "]: " << Xk << "\ns: " << S1[s] << "\nT: " << T[i] << "\n";
+        #endif
+
         a += F(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S1[s]);
         a += b;
-//        std::cout << "A = " << a << "\n";
+
+        #ifdef MD5_DEBUG
+            std::cout << "A = " << a << "\n";
+        #endif
     };
 
     inline void GG(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 16 << "]: " << Xk << "\ns: " << S2[s] << "\nT: " << T[i] << "\n";
+        #ifdef MD5_DEBUG
+            std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 16 << "]: " << Xk << "\ns: " << S2[s] << "\nT: " << T[i] << "\n";
+        #endif // MD5_DEBUG
+
         a += G(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S2[s]);
         a += b;
-//        std::cout << "A = " << a << "\n";
+
+        #ifdef MD5_DEBUG
+            std::cout << "A = " << a << "\n";
+        #endif // MD5_DEBUG
     };
 
     inline void HH(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 32 << "]: " << Xk << "\ns: " << S3[s] << "\nT: " << T[i] << "\n";
+        #ifdef MD5_DEBUG
+            std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 32 << "]: " << Xk << "\ns: " << S3[s] << "\nT: " << T[i] << "\n";
+        #endif // MD5_DEBUG
+
         a += H(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S3[s]);
         a += b;
-//        std::cout << "A = " << a << "\n";
+
+        #ifdef MD5_DEBUG
+            std::cout << "A = " << a << "\n";
+        #endif // MD5_DEBUG
     };
     inline void II(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-//        std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 48 << "]: " << Xk << "\ns: " << S4[s] << "\nT: " << T[i] << "\n";
+        #ifdef MD5_DEBUG
+            std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 48 << "]: " << Xk << "\ns: " << S4[s] << "\nT: " << T[i] << "\n";
+        #endif // MD5_DEBUG
+
         a += I(b,c,d) + Xk + T[i];
         a = cyclic_left_rotate(a, S4[s]);
         a += b;
-//        std::cout << "A = " << a << "\n";
-    };
 
+        #ifdef MD5_DEBUG
+            std::cout << "A = " << a << "\n";
+        #endif // MD5_DEBUG
+    };
 
     /*
      * Define my endian-ness.  Could not do in a portable manner using the
@@ -105,62 +134,7 @@ namespace md5 {
      */
     #define MD5_SWAP(n) (n)
 
-    #endif
-
-    /*
-     * These are the four functions used in the four steps of the md5
-     * algorithm and defined in the RFC 1321.  The first function is a
-     * little bit optimized (as found in Colin Plumbs public domain
-     * implementation).
-     */
-    /* #define MD5_FF(b, c, d) ((b & c) | (~b & d)) */
-    #define MD5_FF(b, c, d) (d ^ (b & (c ^ d)))
-    #define MD5_FG(b, c, d) MD5_FF(d, b, c)
-    #define MD5_FH(b, c, d) (b ^ c ^ d)
-    #define MD5_FI(b, c, d) (c ^ (b | ~d))
-
-    /*
-     * It is unfortunate that C does not provide an operator for cyclic
-     * rotation.  Hope the C compiler is smart enough.  -- Modified to
-     * remove the w = at the front - Gray 2/97
-     */
-    #define MD5_CYCLIC(w, s) ((w << s) | (w >> (32 - s)))
-
-    /*
-     * First Round: using the given function, the context and a constant
-     * the next context is computed.  Because the algorithms processing
-     * unit is a 32-bit word and it is determined to work on words in
-     * little endian byte order we perhaps have to change the byte order
-     * before the computation.  To reduce the work for the next steps we
-     * store the swapped words in the array CORRECT_WORDS. -- Modified to
-     * fix the handling of unaligned buffer spaces - Gray 7/97
-     */
-    #define MD5_OP1(a, b, c, d, b_p, c_p, s, T) \
-        do { \
-            memcpy(c_p, b_p, sizeof(unsigned int)); \
-            *c_p = MD5_SWAP(*c_p); \
-            /*std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << place++ << "]: " << *c_p << "\ns: " << s << "\nT: " << T << "\n";*/ \
-            a += MD5_FF (b, c, d) + *c_p + T; \
-            a = MD5_CYCLIC (a, s); \
-            a += b; \
-            /*std::cout << "A = " << a << "\n";*/ \
-            b_p = (char *)b_p + sizeof(unsigned int); \
-            c_p++; \
-        } while (0)
-
-    /*
-     * Second to Fourth Round: we have the possibly swapped words in
-     * CORRECT_WORDS.  Redefine the macro to take an additional first
-     * argument specifying the function to use.
-     */
-    #define MD5_OP234(FUNC, a, b, c, d, k, s, T) \
-        do { \
-            /*std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << place++ << "]: " << k << "\ns: " << s << "\nT: " << T << "\n";*/ \
-            a += FUNC (b, c, d) + k + T; \
-            a = MD5_CYCLIC (a, s); \
-            a += b; \
-            /*std::cout << "A = " << a << "\n";*/ \
-        } while (0)
+    #endif // MD5_BIG_ENDIAN
 
     const char* HEX_STRING = "0123456789abcdef";    /* to convert to hex */
 }

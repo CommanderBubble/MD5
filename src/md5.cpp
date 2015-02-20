@@ -2,7 +2,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "../conf.h"
+#include "conf.h"
 #include "md5.h"
 #include "md5_loc.h"
 
@@ -49,16 +49,16 @@ namespace md5 {
      *
      * buffer - A buffer of bytes whose MD5 signature we are calculating.
      *
-     * buf_len_ - The length of the buffer.
+     * input_length - The length of the buffer.
      *
      * signature - A 16 byte buffer that will contain the MD5 signature.
      */
-    md5_t::md5_t(const char* buffer_, const unsigned int buf_len_, void* signature) {
+    md5_t::md5_t(const char* input, const unsigned int input_length, void* signature) {
         /* initialize the computation context */
         initialise();
 
-        /* process whole buffer but last buf_len_ % MD5_BLOCK bytes */
-        process(buffer_, buf_len_);
+        /* process whole buffer but last input_length % MD5_BLOCK bytes */
+        process(input, input_length);
 
         /* put result in desired memory area */
         finish(signature);
@@ -80,9 +80,9 @@ namespace md5 {
      *
      * buffer - A buffer of bytes whose MD5 signature we are calculating.
      *
-     * buf_len_ - The length of the buffer.
+     * input_length - The length of the buffer.
      */
-    void md5_t::process(const void* buffer_, const unsigned int buffer_length) {
+    void md5_t::process(const void* input, const unsigned int input_length) {
         if (!finished) {
             unsigned int processed = 0;
 
@@ -91,10 +91,10 @@ namespace md5 {
              * bytes first, and the new data is large enough to create a complete block then
              * we process these bytes first.
              */
-            if (stored_size and buffer_length + stored_size >= md5::BLOCK_SIZE) {
+            if (stored_size and input_length + stored_size >= md5::BLOCK_SIZE) {
                 char block[md5::BLOCK_SIZE];
                 memcpy(block, stored, stored_size);
-                memcpy(block + stored_size, buffer_, md5::BLOCK_SIZE - stored_size);
+                memcpy(block + stored_size, input, md5::BLOCK_SIZE - stored_size);
                 processed = md5::BLOCK_SIZE - stored_size;
                 stored_size = 0;
                 process_block(block);
@@ -103,8 +103,8 @@ namespace md5 {
             /*
              * While there is enough data to create a complete block, process it.
              */
-            while (processed + md5::BLOCK_SIZE <= buffer_length) {
-                process_block((char*)buffer_ + processed);
+            while (processed + md5::BLOCK_SIZE <= input_length) {
+                process_block((char*)input + processed);
                 processed += md5::BLOCK_SIZE;
             }
 
@@ -112,66 +112,14 @@ namespace md5 {
              * If there are any unprocessed bytes left over that do not create a complete block
              * then we store these bytes for processing next time.
              */
-            if (processed != buffer_length) {
-                memcpy(stored + stored_size, (char*)buffer_ + processed, buffer_length - processed);
-                stored_size += buffer_length - processed;
+            if (processed != input_length) {
+                memcpy(stored + stored_size, (char*)input + processed, input_length - processed);
+                stored_size += input_length - processed;
             } else {
                 stored_size = 0;
             }
         } else {
             // throw error when trying to process after completion?
-        }
-    }
-
-    void md5_t::process_old(const void* buffer_, const unsigned int buf_len_) {
-        if (!finished) {
-            unsigned int len = buf_len_;
-            unsigned int in_block, add;
-
-            /*
-             * When we already have some bytes in our internal buffer, copy some
-             * from the user to fill the block.
-             */
-
-            if (buf_len > 0) {
-                in_block = buf_len;
-                if (in_block + len > sizeof(buffer)) {
-                    add = sizeof(buffer) - in_block;
-                } else {
-                    add = len;
-                }
-
-                memcpy(buffer + in_block, buffer_, add);
-                buf_len += add;
-                in_block += add;
-
-                if (in_block > md5::BLOCK_SIZE) {
-                    process_block_old(buffer, in_block & ~md5::BLOCK_SIZE_MASK);
-                    /* the regions in the following copy operation will not overlap. */
-                    memcpy(buffer,
-                    buffer + (in_block & ~md5::BLOCK_SIZE_MASK),
-                    in_block & md5::BLOCK_SIZE_MASK);
-                    buf_len = in_block & md5::BLOCK_SIZE_MASK;
-                }
-
-                buffer_ = (const char*)buffer_ + add;
-                len -= add;
-            }
-
-            /* process available complete blocks right from the user buffer */
-            if (len > md5::BLOCK_SIZE) {
-                process_block_old(buffer_, len & ~md5::BLOCK_SIZE_MASK);
-                buffer_ = (const char*) buffer_ + (len & ~md5::BLOCK_SIZE_MASK);
-                len &= md5::BLOCK_SIZE_MASK;
-            }
-
-            /* copy remaining bytes into the internal buffer */
-            if (len > 0) {
-                memcpy(buffer, buffer_, len);
-                buf_len = len;
-            }
-        } else {
-            // add error?
         }
     }
 
@@ -240,79 +188,6 @@ namespace md5 {
             get_result(static_cast<void*>(signature));
 
             /* store the signature into a readable sring */
-            sig_to_string(signature, str, 33);
-
-            if (signature_ != NULL) {
-                memcpy(signature_, static_cast<void*>(signature), MD5_SIZE);
-            }
-
-            finished = true;
-        } else {
-            // add error?
-        }
-    }
-
-    void md5_t::finish_old(void* signature_) {
-        if (!finished) {
-            unsigned int bytes, hold;
-            int pad;
-
-            /* take yet unprocessed bytes into account */
-            bytes = buf_len;
-
-            /*
-             * Count remaining bytes.  Modified to do this to better avoid
-             * overflows in the lower word -- Gray 10/97.
-             */
-            if (total[0] > UINT32_MAX - bytes) {
-                total[1]++;
-                total[0] -= (UINT32_MAX + 1 - bytes);
-            } else {
-                total[0] += bytes;
-            }
-
-            /*
-             * Pad the buffer to the next MD5_BLOCK-byte boundary.  (RFC 1321,
-             * 3.1: Step 1).  We need enough room for two size words and the
-             * bytes left in the buffer.  For some reason even if we are equal
-             * to the block-size, we add an addition block of pad bytes.
-             */
-            pad = md5::BLOCK_SIZE - (sizeof(unsigned int) * 2) - bytes;
-            if (pad <= 0) {
-                pad += md5::BLOCK_SIZE;
-            }
-
-            /*
-             * Modified from a fixed array to this assignment and memset to be
-             * more flexible with block-sizes -- Gray 10/97.
-             */
-            if (pad > 0) {
-                /* some sort of padding start byte */
-                buffer[bytes] = (unsigned char)0x80;
-                if (pad > 1) {
-                    memset(buffer + bytes + 1, 0, pad - 1);
-                }
-                bytes += pad;
-            }
-
-            /*
-             * Put the 64-bit file length in _bits_ (i.e. *8) at the end of the
-             * buffer.
-             */
-            hold = MD5_SWAP((total[0] & 0x1FFFFFFF) << 3);
-            memcpy(buffer + bytes, &hold, sizeof(unsigned int));
-            bytes += sizeof(unsigned int);
-
-            /* shift the high word over by 3 and add in the top 3 bits from the low */
-            hold = MD5_SWAP((total[1] << 3) | ((total[0] & 0xE0000000) >> 29));
-            memcpy(buffer + bytes, &hold, sizeof(unsigned int));
-            bytes += sizeof(unsigned int);
-
-            /* process last bytes, the padding chars, and size words */
-            process_block_old(buffer, bytes);
-
-            get_result(static_cast<void*>(signature));
-
             sig_to_string(signature, str, 33);
 
             if (signature_ != NULL) {
@@ -403,12 +278,6 @@ namespace md5 {
         message_length[1] = 0;
         stored_size = 0;
 
-        memset(stored, 0, 2 * md5::BLOCK_SIZE);
-
-        total[0] = 0;
-        total[1] = 0;
-        buf_len = 0;
-
         finished = false;
     }
 
@@ -427,7 +296,7 @@ namespace md5 {
      *
      * buffer - A buffer of bytes whose MD5 signature we are calculating.
      *
-     * buf_len - The length of the buffer.
+     * input_length - The length of the buffer.
      */
     void md5_t::process_block(const void* block) {
     /* Process each 16-word block. */
@@ -561,128 +430,6 @@ namespace md5 {
         B += BB;
         C += CC;
         D += DD;
-    }
-
-    void md5_t::process_block_old(const void *buffer_, const unsigned int buf_len_) {
-        unsigned int correct[16];
-        const void* buf_p = buffer_;
-        const void* end_p;
-        unsigned int words_n;
-
-        words_n = buf_len_ / sizeof(unsigned int);
-        end_p = (char*)buf_p + words_n * sizeof(unsigned int);
-
-        /*
-         * First increment the byte count.  RFC 1321 specifies the possible
-         * length of the file up to 2^64 bits.  Here we only compute the
-         * number of bytes with a double word increment.  Modified to do
-         * this to better avoid overflows in the lower word -- Gray 10/97.
-         */
-        if (total[0] > UINT32_MAX - buf_len_) {
-            total[1]++;
-            total[0] -= (UINT32_MAX + 1 - buf_len_);
-        } else {
-            total[0] += buf_len_;
-        }
-
-        /*
-         * Process all bytes in the buffer with MD5_BLOCK bytes in each
-         * round of the loop.
-         */
-        while (buf_p < end_p) {
-            unsigned int AA, BB, CC, DD;
-            unsigned int* corr_p = correct;
-
-            AA = A;
-            BB = B;
-            CC = C;
-            DD = D;
-
-            /*
-             * Before we start, one word to the strange constants.  They are
-             * defined in RFC 1321 as
-             *
-             * T[i] = (int) (4294967296.0 * fabs (sin (i))), i=1..64
-             */
-
-            /* Round 1. */
-            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0xd76aa478);
-            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0xe8c7b756);
-            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0x242070db);
-            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0xc1bdceee);
-            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0xf57c0faf);
-            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0x4787c62a);
-            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xa8304613);
-            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0xfd469501);
-            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0x698098d8);
-            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0x8b44f7af);
-            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xffff5bb1);
-            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0x895cd7be);
-            MD5_OP1(A, B, C, D, buf_p, corr_p,  7, 0x6b901122);
-            MD5_OP1(D, A, B, C, buf_p, corr_p, 12, 0xfd987193);
-            MD5_OP1(C, D, A, B, buf_p, corr_p, 17, 0xa679438e);
-            MD5_OP1(B, C, D, A, buf_p, corr_p, 22, 0x49b40821);
-
-            /* Round 2. */
-            MD5_OP234(MD5_FG, A, B, C, D, correct[  1],  5, 0xf61e2562);
-            MD5_OP234(MD5_FG, D, A, B, C, correct[  6],  9, 0xc040b340);
-            MD5_OP234(MD5_FG, C, D, A, B, correct[ 11], 14, 0x265e5a51);
-            MD5_OP234(MD5_FG, B, C, D, A, correct[  0], 20, 0xe9b6c7aa);
-            MD5_OP234(MD5_FG, A, B, C, D, correct[  5],  5, 0xd62f105d);
-            MD5_OP234(MD5_FG, D, A, B, C, correct[ 10],  9, 0x02441453);
-            MD5_OP234(MD5_FG, C, D, A, B, correct[ 15], 14, 0xd8a1e681);
-            MD5_OP234(MD5_FG, B, C, D, A, correct[  4], 20, 0xe7d3fbc8);
-            MD5_OP234(MD5_FG, A, B, C, D, correct[  9],  5, 0x21e1cde6);
-            MD5_OP234(MD5_FG, D, A, B, C, correct[ 14],  9, 0xc33707d6);
-            MD5_OP234(MD5_FG, C, D, A, B, correct[  3], 14, 0xf4d50d87);
-            MD5_OP234(MD5_FG, B, C, D, A, correct[  8], 20, 0x455a14ed);
-            MD5_OP234(MD5_FG, A, B, C, D, correct[ 13],  5, 0xa9e3e905);
-            MD5_OP234(MD5_FG, D, A, B, C, correct[  2],  9, 0xfcefa3f8);
-            MD5_OP234(MD5_FG, C, D, A, B, correct[  7], 14, 0x676f02d9);
-            MD5_OP234(MD5_FG, B, C, D, A, correct[ 12], 20, 0x8d2a4c8a);
-
-            /* Round 3. */
-            MD5_OP234(MD5_FH, A, B, C, D, correct[  5],  4, 0xfffa3942);
-            MD5_OP234(MD5_FH, D, A, B, C, correct[  8], 11, 0x8771f681);
-            MD5_OP234(MD5_FH, C, D, A, B, correct[ 11], 16, 0x6d9d6122);
-            MD5_OP234(MD5_FH, B, C, D, A, correct[ 14], 23, 0xfde5380c);
-            MD5_OP234(MD5_FH, A, B, C, D, correct[  1],  4, 0xa4beea44);
-            MD5_OP234(MD5_FH, D, A, B, C, correct[  4], 11, 0x4bdecfa9);
-            MD5_OP234(MD5_FH, C, D, A, B, correct[  7], 16, 0xf6bb4b60);
-            MD5_OP234(MD5_FH, B, C, D, A, correct[ 10], 23, 0xbebfbc70);
-            MD5_OP234(MD5_FH, A, B, C, D, correct[ 13],  4, 0x289b7ec6);
-            MD5_OP234(MD5_FH, D, A, B, C, correct[  0], 11, 0xeaa127fa);
-            MD5_OP234(MD5_FH, C, D, A, B, correct[  3], 16, 0xd4ef3085);
-            MD5_OP234(MD5_FH, B, C, D, A, correct[  6], 23, 0x04881d05);
-            MD5_OP234(MD5_FH, A, B, C, D, correct[  9],  4, 0xd9d4d039);
-            MD5_OP234(MD5_FH, D, A, B, C, correct[ 12], 11, 0xe6db99e5);
-            MD5_OP234(MD5_FH, C, D, A, B, correct[ 15], 16, 0x1fa27cf8);
-            MD5_OP234(MD5_FH, B, C, D, A, correct[  2], 23, 0xc4ac5665);
-
-            /* Round 4. */
-            MD5_OP234(MD5_FI, A, B, C, D, correct[  0],  6, 0xf4292244);
-            MD5_OP234(MD5_FI, D, A, B, C, correct[  7], 10, 0x432aff97);
-            MD5_OP234(MD5_FI, C, D, A, B, correct[ 14], 15, 0xab9423a7);
-            MD5_OP234(MD5_FI, B, C, D, A, correct[  5], 21, 0xfc93a039);
-            MD5_OP234(MD5_FI, A, B, C, D, correct[ 12],  6, 0x655b59c3);
-            MD5_OP234(MD5_FI, D, A, B, C, correct[  3], 10, 0x8f0ccc92);
-            MD5_OP234(MD5_FI, C, D, A, B, correct[ 10], 15, 0xffeff47d);
-            MD5_OP234(MD5_FI, B, C, D, A, correct[  1], 21, 0x85845dd1);
-            MD5_OP234(MD5_FI, A, B, C, D, correct[  8],  6, 0x6fa87e4f);
-            MD5_OP234(MD5_FI, D, A, B, C, correct[ 15], 10, 0xfe2ce6e0);
-            MD5_OP234(MD5_FI, C, D, A, B, correct[  6], 15, 0xa3014314);
-            MD5_OP234(MD5_FI, B, C, D, A, correct[ 13], 21, 0x4e0811a1);
-            MD5_OP234(MD5_FI, A, B, C, D, correct[  4],  6, 0xf7537e82);
-            MD5_OP234(MD5_FI, D, A, B, C, correct[ 11], 10, 0xbd3af235);
-            MD5_OP234(MD5_FI, C, D, A, B, correct[  2], 15, 0x2ad7d2bb);
-            MD5_OP234(MD5_FI, B, C, D, A, correct[  9], 21, 0xeb86d391);
-
-            /* Add the starting values of the context. */
-            A += AA;
-            B += BB;
-            C += CC;
-            D += DD;
-        }
     }
 
     /*

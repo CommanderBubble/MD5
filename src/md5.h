@@ -1,8 +1,6 @@
 #ifndef __MD5_H__
 #define __MD5_H__
 
-#include <string>
-
 /*
  * Size of a standard MD5 signature in bytes.  This definition is for
  * external programs only.  The MD5 routines themselves reference the
@@ -56,13 +54,13 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              *
              * ARGUMENTS:
              *
-             * buffer - A buffer of bytes whose MD5 signature we are calculating.
+             * input - A buffer of bytes whose MD5 signature we are calculating.
              *
-             * buf_len - The length of the buffer.
+             * input_length - The length of the buffer.
              *
              * signature_ - A 16 byte buffer that will contain the MD5 signature.
              */
-            md5_t(const char* buffer_, const unsigned int buf_len_, void* signature_);
+            md5_t(const char* input, const unsigned int input_length, void* signature_ = NULL);
 
             /*
              * process
@@ -78,12 +76,11 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              *
              * ARGUMENTS:
              *
-             * buffer - A buffer of bytes whose MD5 signature we are calculating.
+             * input - A buffer of bytes whose MD5 signature we are calculating.
              *
-             * buf_len - The length of the buffer.
+             * input_length - The length of the buffer.
              */
-            void process(const void* buffer_, const unsigned int buffer_length_);
-            void process_old(const void* buffer_, const unsigned int buf_len_);
+            void process(const void* input, const unsigned int input_length);
 
             /*
              * finish
@@ -104,7 +101,6 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              * signature_ - A 16 byte buffer that will contain the MD5 signature.
              */
             void finish(void* signature_ = NULL);
-            void finish_old(void* signature_ = NULL);
 
             /*
              * get_sig
@@ -148,7 +144,6 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
             /* internal functions */
             void initialise();
             void process_block(const void*);
-            void process_block_old(const void*, const unsigned int);
             void get_result(void*);
 
             unsigned int A;                         /* accumulator 1 */
@@ -157,12 +152,8 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
             unsigned int D;                         /* accumulator 4 */
 
             unsigned int message_length[2];         /* length of data */
-            unsigned int stored_size;
-            char stored[md5::BLOCK_SIZE * 2];
-
-            unsigned int total[2];                  /* totalling storage */
-            unsigned int buf_len;                   /* length of the storage buffer */
-            char buffer[md5::BLOCK_SIZE * 2];       /* character storage buffer */
+            unsigned int stored_size;               /* length of stored bytes */
+            char stored[md5::BLOCK_SIZE * 2];       /* stored bytes */
 
             bool finished;                          /* object state */
 
