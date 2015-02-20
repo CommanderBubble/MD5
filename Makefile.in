@@ -59,15 +59,10 @@ distclean : uninstall clean
 	rm -rf autom4te.cache
 	rm -f Makefile
 
-installdirs :
-	$(srcdir)/mkinstalldirs $(includedir) $(libdir) $(bindir)
-
 installincs : $(HFLS)
-	$(srcdir)/mkinstalldirs $(includedir)
 	$(INSTALL_DATA) $(HFLS) $(includedir)
 
 installlib : $(INSTALL_LIB)
-	$(srcdir)/mkinstalldirs $(libdir)
 	$(INSTALL_DATA) $(LIBRARY) $(libdir)
 	@RANLIB@ $(libdir)/$(LIBRARY)
 
