@@ -1,27 +1,15 @@
 #
 # Process this file with autoconf to produce a configure script.
 #
-# Copyright 2010 by Gray Watson
-#
-# Permission to use, copy, modify, and distribute this software for
-# any purpose and without fee is hereby granted, provided that the
-# above copyright notice and this permission notice appear in all
-# copies, and that the name of Gray Watson not be used in
-# advertising or publicity pertaining to distribution of the
-# document or software without specific, written prior permission.
-#
-# Gray Watson makes no representations about the suitability of the
-# software described herein for any purpose.  It is provided "as is"
-# without express or implied warranty.
-#
-# $Id: configure.ac,v 1.2 2010-05-07 15:07:37 gray Exp $
-#
-AC_REVISION($Revision: 1.2 $)
-AC_INIT(md5, 1.3.0, [http://256.com/sources/md5/])
-AC_CONFIG_SRCDIR(./src)
-AC_CONFIG_HEADER(conf.h)
+AC_REVISION($Revision: 0.8 $)
+AC_INIT(MD5, 0.8, [https://github.com/CommanderBubble/MD5])
 
-AC_MSG_NOTICE([configurations for the md5 library])
+AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR(config)
+AC_CONFIG_SRCDIR(./src)
+AC_CONFIG_HEADER(src/conf.h)
+
+AC_MSG_NOTICE([Configurations for the MD5 library])
 
 ##############################################################################
 # arguments
@@ -35,18 +23,18 @@ AC_PROG_RANLIB
 AC_HEADER_STDC
 
 ###############################################################################
-
 #
 # check for unsigned-ness
 #
+
 AC_MSG_CHECKING([endian-ness])
 AC_RUN_IFELSE(
 	[AC_LANG_SOURCE([
 		int main() { int x = 1; char *s = (char *)&x; if (*s == '\001') return 0; else return 1; }
 	])],
-	[AC_DEFINE(MD5_BIG_ENDIAN, 0, [Little-endian machine])],
-	[AC_DEFINE(MD5_BIG_ENDIAN, 1, [Big-endian machine])],
-	[AC_DEFINE(MD5_BIG_ENDIAN, 0, [Cross-compiling; assumed little-endian])]
+	[AC_DEFINE(MD5_BIG_ENDIAN, 0, [Are we a big- or little-endian machine])],
+	[AC_DEFINE(MD5_BIG_ENDIAN, 1, [Are we a big- or little-endian machine])],
+	[AC_DEFINE(MD5_BIG_ENDIAN, 0, [Are we a big- or little-endian machine])]
 )
 
 # HACK: we run the test because AC_RUN_IFELSE wont take multiple actions that i can figure out...
@@ -58,6 +46,25 @@ AC_RUN_IFELSE(
 	[AC_MSG_RESULT([big])],
 	[AC_MSG_RESULT([unknown, assume little])]
 )
+
+##############################################################################
+#
+# check if we are enabling debig printing
+#
+
+AC_ARG_ENABLE([transform-debugging],
+	[AS_HELP_STRING([--enable-transform-debugging],
+					[Enable debugging output from internal transforms])]
+)
+
+AC_MSG_CHECKING([for transform debugging])
+if test "x$enable_transform_debugging" = "xyes"; then
+	AC_DEFINE(MD5_DEBUG, 1, [Enable debugging output from internal transforms])
+	AC_MSG_RESULT([enabled])
+else
+	AC_DEFINE(MD5_DEBUG, 0, [Disable debugging output from internal transforms])
+	AC_MSG_RESULT([disabled])
+fi
 
 AC_CONFIG_FILES(Makefile)
 AC_OUTPUT
