@@ -18,8 +18,6 @@
 /// For now we are assuming everything is in little endian byte-order
 
 namespace md5 {
-    const unsigned int BLOCK_SIZE_MASK = md5::BLOCK_SIZE - 1;
-
     /*
      * NOTE: the following is assumed to generate a 32-bit unsigned data
      * type.

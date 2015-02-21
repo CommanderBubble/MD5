@@ -1,4 +1,4 @@
-#include <cstdlib>
+#include <cassert>
 #include <cstring>
 #include <iostream>
 
@@ -269,6 +269,12 @@ namespace md5 {
      * None.
      */
     void md5_t::initialise() {
+        /*
+         * ensures that unsigned int is 4 bytes on this platform, will need modifying
+         * if we are to use on a different sized platform.
+         */
+        assert(md5::BLOCK_SIZE == 16);
+
         A = 0x67452301;
         B = 0xefcdab89;
         C = 0x98badcfe;
