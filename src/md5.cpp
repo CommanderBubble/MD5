@@ -166,13 +166,13 @@ namespace md5 {
              * Put the 64-bit file length in _bits_ (i.e. *8) at the end of the
              * buffer.
              */
-            unsigned int size_low = ((message_length[0] & 0x1FFFFFFF) << 3);
-            memcpy(stored + stored_size, &size_low, sizeof(unsigned int));
-            stored_size += sizeof(unsigned int);
-
             /* shift the high word over by 3 and add in the top 3 bits from the low */
             unsigned int size_high = (message_length[1] << 3) | ((message_length[0] & 0xE0000000) >> 29);
             memcpy(stored + stored_size, &size_high, sizeof(unsigned int));
+            stored_size += sizeof(unsigned int);
+
+            unsigned int size_low = ((message_length[0] & 0x1FFFFFFF) << 3);
+            memcpy(stored + stored_size, &size_low, sizeof(unsigned int));
             stored_size += sizeof(unsigned int);
 
             /*
@@ -273,7 +273,7 @@ namespace md5 {
          * ensures that unsigned int is 4 bytes on this platform, will need modifying
          * if we are to use on a different sized platform.
          */
-        assert(md5::BLOCK_SIZE == 16);
+        assert(MD5_SIZE == 16);
 
         A = 0x67452301;
         B = 0xefcdab89;
