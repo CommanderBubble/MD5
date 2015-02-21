@@ -143,7 +143,7 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
         private:
             /* internal functions */
             void initialise();
-            void process_block(const void*);
+            void process_block(const unsigned char*);
             void get_result(void*);
 
             unsigned int A;                             /* accumulator 1 */

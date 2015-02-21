@@ -92,7 +92,7 @@ namespace md5 {
              * we process these bytes first.
              */
             if (stored_size and input_length + stored_size >= md5::BLOCK_SIZE) {
-                char block[md5::BLOCK_SIZE];
+                unsigned char block[md5::BLOCK_SIZE];
                 memcpy(block, stored, stored_size);
                 memcpy(block + stored_size, input, md5::BLOCK_SIZE - stored_size);
                 processed = md5::BLOCK_SIZE - stored_size;
@@ -104,7 +104,7 @@ namespace md5 {
              * While there is enough data to create a complete block, process it.
              */
             while (processed + md5::BLOCK_SIZE <= input_length) {
-                process_block((char*)input + processed);
+                process_block((unsigned char*)input + processed);
                 processed += md5::BLOCK_SIZE;
             }
 
@@ -304,7 +304,7 @@ namespace md5 {
      *
      * input_length - The length of the buffer.
      */
-    void md5_t::process_block(const void* block) {
+    void md5_t::process_block(const unsigned char* block) {
     /* Process each 16-word block. */
 
         /*
@@ -319,7 +319,7 @@ namespace md5 {
         // Copy the block into X. */
         unsigned int X[16];
         for (unsigned int i = 0; i < 16; i++) {
-            memcpy(X + i, (char*)block + 4 * i, 4);
+            memcpy(X + i, block + 4 * i, 4);
         }
 
         /* Save A as AA, B as BB, C as CC, and D as DD. */
