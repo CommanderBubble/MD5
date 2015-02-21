@@ -60,7 +60,7 @@ namespace md5 {
     inline unsigned int I(unsigned int x, unsigned int y, unsigned int z) {return y ^ (x | ~z);};
 
     inline void FF(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i << "]: " << Xk << "\ns: " << S1[s] << "\nT: " << T[i] << "\n";
         #endif
 
@@ -68,13 +68,13 @@ namespace md5 {
         a = cyclic_left_rotate(a, S1[s]);
         a += b;
 
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "A = " << a << "\n";
         #endif
     };
 
     inline void GG(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 16 << "]: " << Xk << "\ns: " << S2[s] << "\nT: " << T[i] << "\n";
         #endif // MD5_DEBUG
 
@@ -82,13 +82,13 @@ namespace md5 {
         a = cyclic_left_rotate(a, S2[s]);
         a += b;
 
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "A = " << a << "\n";
         #endif // MD5_DEBUG
     };
 
     inline void HH(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 32 << "]: " << Xk << "\ns: " << S3[s] << "\nT: " << T[i] << "\n";
         #endif // MD5_DEBUG
 
@@ -101,7 +101,7 @@ namespace md5 {
         #endif // MD5_DEBUG
     };
     inline void II(unsigned int &a, unsigned int b, unsigned int c, unsigned int d, unsigned int Xk, unsigned int s, unsigned int i) {
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "\nA: " << a << "\nB: " << b << "\nC: " << c << "\nD: " << d << "\nX[" << i - 48 << "]: " << Xk << "\ns: " << S4[s] << "\nT: " << T[i] << "\n";
         #endif // MD5_DEBUG
 
@@ -109,7 +109,7 @@ namespace md5 {
         a = cyclic_left_rotate(a, S4[s]);
         a += b;
 
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "A = " << a << "\n";
         #endif // MD5_DEBUG
     };
