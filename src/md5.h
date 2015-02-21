@@ -146,19 +146,19 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
             void process_block(const void*);
             void get_result(void*);
 
-            unsigned int A;                         /* accumulator 1 */
-            unsigned int B;                         /* accumulator 2 */
-            unsigned int C;                         /* accumulator 3 */
-            unsigned int D;                         /* accumulator 4 */
+            unsigned int A;                             /* accumulator 1 */
+            unsigned int B;                             /* accumulator 2 */
+            unsigned int C;                             /* accumulator 3 */
+            unsigned int D;                             /* accumulator 4 */
 
-            unsigned int message_length[2];         /* length of data */
-            unsigned int stored_size;               /* length of stored bytes */
-            char stored[md5::BLOCK_SIZE * 2];       /* stored bytes */
+            unsigned int message_length[2];             /* length of data */
+            unsigned int stored_size;                   /* length of stored bytes */
+            unsigned char stored[md5::BLOCK_SIZE * 2];  /* stored bytes */
 
-            bool finished;                          /* object state */
+            bool finished;                              /* object state */
 
-            char signature[MD5_SIZE];               /* stored signature */
-            char str[MD5_STRING_SIZE];              /* stored plain text hash */
+            char signature[MD5_SIZE];                   /* stored signature */
+            char str[MD5_STRING_SIZE];                  /* stored plain text hash */
     };
 
     /*
