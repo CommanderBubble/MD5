@@ -11,7 +11,7 @@
  * We don't include "conf.h" here because it gets included before this file in md5.cpp so the defines
  * are correctly determing before they are checked.
  */
- #ifdef MD5_DEBUG
+ #if MD5_DEBUG
     #include <iostream>
 #endif // MD5_DEBUG
 
@@ -96,7 +96,7 @@ namespace md5 {
         a = cyclic_left_rotate(a, S3[s]);
         a += b;
 
-        #ifdef MD5_DEBUG
+        #if MD5_DEBUG
             std::cout << "A = " << a << "\n";
         #endif // MD5_DEBUG
     };
