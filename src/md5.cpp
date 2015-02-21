@@ -188,7 +188,7 @@ namespace md5 {
             get_result(static_cast<void*>(signature));
 
             /* store the signature into a readable sring */
-            sig_to_string(signature, str, MD5_SIZE);
+            sig_to_string(signature, str, MD5_STRING_SIZE);
 
             if (signature_ != NULL) {
                 memcpy(signature_, static_cast<void*>(signature), MD5_SIZE);
