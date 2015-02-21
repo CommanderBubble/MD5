@@ -53,7 +53,7 @@ namespace md5 {
      *
      * signature - A 16 byte buffer that will contain the MD5 signature.
      */
-    md5_t::md5_t(const char* input, const unsigned int input_length, void* signature) {
+    md5_t::md5_t(const void* input, const unsigned int input_length, void* signature) {
         /* initialize the computation context */
         initialise();
 

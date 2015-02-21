@@ -60,7 +60,7 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              *
              * signature_ - A 16 byte buffer that will contain the MD5 signature.
              */
-            md5_t(const char* input, const unsigned int input_length, void* signature_ = NULL);
+            md5_t(const void* input, const unsigned int input_length, void* signature_ = NULL);
 
             /*
              * process
