@@ -135,10 +135,8 @@ const unsigned int MD5_STRING_SIZE = 2 * MD5_SIZE + 1;      /* 33 */
              *
              * str_ - a string of characters which should be at least 33 bytes long
              * (2 characters per MD5 byte and 1 for the \0).
-             *
-             * str_len - the length of the string.
              */
-            void get_string(void* str_, const unsigned int str_len);
+            void get_string(void* str_);
 
         private:
             /* internal functions */

@@ -239,12 +239,10 @@ namespace md5 {
      *
      * str_ - a string of characters which should be at least 33 bytes long
      * (2 characters per MD5 byte and 1 for the \0).
-     *
-     * str_len - the length of the string.
      */
-    void md5_t::get_string(void* str_, const unsigned int str_len) {
+    void md5_t::get_string(void* str_) {
         if (finished) {
-            memcpy(str_, str, str_len);
+            memcpy(str_, str, MD5_STRING_SIZE);
         } else {
             // error?
         }
