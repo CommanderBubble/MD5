@@ -85,5 +85,5 @@ check : $(TEST)
 
 $(TEST) : $(TEST).o $(LIBRARY)
 	rm -f $@
-	$(CXX) $(LDFLAGS) -o $(A_OUT) $(TEST).o $(LIBRARY)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(A_OUT) $(TEST).o $(LIBRARY)
 	mv $(A_OUT) $@
