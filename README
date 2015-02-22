@@ -1,0 +1,95 @@
+This library is based of the one found at http://tamalenet/sha1 by Michael D. Leonhard, however has undergone extensive changes. This notice shall serve as indication of the program's origins.
+
+The modifications include a makefile for building a static library.
+This SHOULD be cross-compatible, but is untested on anything other than windows under msys2/mingw.
+
+* Introduction
+
+This is a C++ class that implements the Secure Hash Algorithm SHA-1.  The purpose of the algorithm is to calculate a strong hash of given bit string. By "strong", we mean that it is very difficult to find a different bit string that results in the same hash. It is similarly difficult, using only the hash, to determine the original bit string.  SHA-1 produces a 20 byte (160 bit) hash.
+The SHA-1 hash is currently used for security, however the intended purposes of this library is for file verification, and no guarantees of any kind are present, so if used in security conscious applications, it is at own risk.
+
+* Building The Library
+
+The provided makefile will produce a static lib to link against.
+To build it follow these steps:
+	1) autoreconf
+	2) configure
+	3) make
+	4) make install
+	
+You can then 'make check' to run the library's self checks
+
+By default the library will compile with the CXXFLAGS '-g -O2'. For a production library without the debugging symbols, call
+make CXXFLAGS=<your_flags_here>
+
+* Class Usage
+
+All functions and constants live in the sha1 namespace, or are prefaced by SHA1_ if they are in the public namespace.
+
+The class is called sha1_t.  The API consists of five methods:
+
+sha1::sha1_t() is the class constructor.
+
+void sha1_t::process(const void* input, const unsigned int input_length)
+  Processes bytes into the hash.
+  - input is a pointer to the first byte to be added. The bytes are not modified.
+  - input_length is the number of bytes to process. The value is not modified.
+
+void sha1::finish(void* signature_ = NULL)
+  Completes the hashing process and (optionally) returns the final hash.  The sha1_t instance cannot be used to calculate a new hash after this call.
+  - signature_ is a pointer to a (minimum) 20-byte char array.
+
+if you have all the data available to process at initialisation time, the c=object can be constructed as
+void sha1_t::sha1(const void* input, const unsigned int input_length, void* signature = NULL)
+  - input is a pointer to the first byte to be added. The bytes are not modified.
+  - input_length is the number of bytes to process. The value is not modified.
+
+There are two functions to retrieve the stored signature and string from the object:
+
+void sha1_t::get_sig(void* signature_)
+  Returns the previously calculated signature. can only be used after calling finish().
+  - signature_ is a pointer to a (minimum) 20-byte char array.
+  
+void get_string(void* str_)
+  Returns the previously calculated signature in readable hex format.
+  - str_ is a pointer to a (minimum) 41-byte char array.
+  
+We also provide two auxiliary functions for converting hashes to strings and strings to hashes, for example if the object has expired. These are not class functions, and can be used without ever creating an object if you already have a signature or string.
+
+void sha1::sig_to_string(const void* signature_, char* str_)
+  Is a utility method that turns a digest into a human-readable string
+  - signature_ is a pointer to the char array containing the signature. The bytes are not modified.
+  - str_ is a pointer to the char array for the string to be placed into. it must have room for at least 41 bytes; this is the caller's responsibility.
+
+void sha1::sig_from_string(void* signature_, const char* str_)
+  Is a utility method that turns a digest into a human-readable string
+  - signature_ is a pointer to the char array to place the signature in. it must behave room for at least 20 bytes; this is the caller's responsibility.
+  - str_ is a pointer to the char array containing the string. The bytes are not modified.
+
+
+* Example
+
+The following program will print one line to stdout:
+a9993e364706816aba3e25717850c26c9cd0d89d
+
+#include <string.h>
+#include <cstdlib>
+#include <iostream>
+
+#include <sha1.h>
+
+int main(int argc, char** argv) {
+	const char* BYTES = "abc";
+
+	sha1::sha1_t sha1;
+	sha1.process(BYTES, strlen(BYTES));
+	sha1.finish();
+
+    char str[SHA1_STRING_SIZE];
+
+    sha1.get_string(str);
+
+	for (unsigned int i = 0; i < SHA1_STRING_SIZE; i++) {
+		std::cout << str[i];
+	}
+}
