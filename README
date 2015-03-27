@@ -88,11 +88,10 @@ int main(int argc, char** argv) {
 	md5.process(BYTES, strlen(BYTES));
 	md5.finish();
 
-    char str[MD5_STRING_SIZE];
+	char str[MD5_STRING_SIZE];
 
-    md5.get_string(str);
+	md5.get_string(str);
 
-	for (unsigned int i = 0; i < MD5_STRING_SIZE; i++) {
+	for (unsigned int i = 0; i < MD5_STRING_SIZE; i++)
 		std::cout << str[i];
-	}
 }
