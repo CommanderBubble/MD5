@@ -1,4 +1,4 @@
-This library is inspired by the one found at http://256.com/sources/md5/ by Gray Watson. It was written as the afformentioned library is under the GPL license and has the annoying RSA preamble; this has been written from reading the specification document, and does NOT use the provided code, and is distributed under the MIT licence. This notice shall serve as indication of the program's origins.
+This library is inspired by the one found at http://256.com/sources/md5/ by Gray Watson. It was written as the aforementioned library is under the GPL license and has the annoying RSA preamble; this has been written from reading the specification document, and does NOT use the provided code, and is distributed under the MIT licence. This notice serves as indication of the program's origins.
 
 This SHOULD be cross-compatible, but is untested on anything other than windows under msys2/mingw.
 
